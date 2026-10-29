@@ -1,2 +1,0 @@
-# BigEastCoachingTree
-BigEastCoachTree
