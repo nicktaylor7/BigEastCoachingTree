@@ -2,7 +2,7 @@
 
 *Concept developed by Nicholas Taylor*
 
-An interactive map of how Big East men's basketball head coaches learned the job. It starts with Dave Gavitt and the league's founding coaches and runs through every Big East head coach since, down to today's benches. You can see who worked on whose staff, which branches produced the most coaches and titles, and who ended up taking over for his old boss.
+An interactive map of how Big East men's basketball head coaches learned the job. It starts with Dave Gavitt, who founded the league, and its charter coaches (the men on the sidelines in its first season), and runs through every Big East head coach since, down to today's benches. You can see who worked on whose staff, which branches produced the most coaches and titles, and who ended up taking over for his old boss.
 
 > **Independent fan project.** Not affiliated with, endorsed by or sponsored by the NCAA or the Big East Conference. All team and conference names belong to their owners.
 
@@ -63,7 +63,7 @@ Hover over a line, or tap it on a phone, to see the actual job behind the connec
 - **Mentors** who never coached in the league (Billy Donovan, Herb Sendek, Brad Stevens and others) appear when they are the link between two Big East coaches.
 - **Not included:** one-season interim coaches.
 - **No years or dates** are shown anywhere on the page, by design.
-- Coaches with no staff line back to a founding coach sit on a separate branch called **Lines from outside**.
+- Coaches with no staff line back to a charter coach sit on a separate branch called **Lines from outside**.
 
 Current totals: 86 Big East head coaches and 105 people on the tree.
 

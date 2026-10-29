@@ -320,11 +320,11 @@ svg.dlinks path.on { stroke: var(--fg); stroke-width: 2.6; }
 const W = "https://en.wikipedia.org/wiki/";
 const D = [
   { id: "gavitt", kind: "root", name: "Dave Gavitt", sub: "Founder, first commissioner",
-    bio: "Gavitt built the Big East and ran it as its first commissioner. Before that he coached Providence, and before that he learned the job as Joe Mullaney's assistant at Providence. Every branch in this tree starts with the coaches he brought into the league.",
+    bio: "Gavitt built the Big East and ran it as its first commissioner. He coached Providence until the league began, then stepped off the bench to run it, so he never coached a Big East game. Before that he learned the job as Joe Mullaney's assistant at Providence. Every branch in this tree starts with the charter coaches who were on the sidelines in the league's first season.",
     stops: [["Providence", "assistant under Joe Mullaney", "k"], ["Dartmouth", "assistant, then head coach"], ["Providence", "head coach"], ["Big East", "founder and first commissioner"]],
     also: ["mullaney"], src: [["Dave Gavitt (Wikipedia)", W + "Dave_Gavitt"]] },
 
-  { id: "thompson", parent: "gavitt", kind: "be", name: "John Thompson", sub: "Georgetown · founding coach",
+  { id: "thompson", parent: "gavitt", kind: "be", name: "John Thompson", sub: "Georgetown · charter coach",
     bio: "Georgetown's coach when the league formed, and the man who made the Hoyas a national power. Craig Esherick spent his entire career on Thompson's bench before succeeding him.",
     stops: [["Georgetown", "head coach"]], src: [["Craig Esherick (Wikipedia)", W + "Craig_Esherick"]] },
   { id: "esherick", parent: "thompson", kind: "be", name: "Craig Esherick", sub: "Georgetown",
@@ -332,7 +332,7 @@ const D = [
     stops: [["Georgetown", "graduate assistant under John Thompson", "k"], ["Georgetown", "assistant under John Thompson", "k"], ["U.S. Olympic team", "assistant and scout"], ["Georgetown", "head coach"]],
     src: [["Craig Esherick (Wikipedia)", W + "Craig_Esherick"]] },
 
-  { id: "carnesecca", parent: "gavitt", kind: "be", name: "Lou Carnesecca", sub: "St. John's · founding coach",
+  { id: "carnesecca", parent: "gavitt", kind: "be", name: "Lou Carnesecca", sub: "St. John's · charter coach",
     bio: "St. John's coach when the league formed. He learned as Joe Lapchick's assistant at St. John's before taking over the program, with a detour to coach the ABA's New York Nets.",
     stops: [["St. Ann's Academy", "high school head coach"], ["St. John's", "assistant under Joe Lapchick", "k"], ["St. John's", "head coach"], ["New York Nets (ABA)", "head coach"], ["St. John's", "head coach again"]],
     src: [["Lou Carnesecca (Wikipedia)", W + "Lou_Carnesecca"]] },
@@ -341,7 +341,7 @@ const D = [
     stops: [["St. John's", "assistant under Lou Carnesecca", "k"], ["Manhattan", "head coach"], ["St. John's", "assistant under Lou Carnesecca", "k"], ["St. John's", "head coach"]],
     src: [["Brian Mahoney (Wikipedia)", W + "Brian_Mahoney_(basketball)"], ["Lou Carnesecca (Wikipedia)", W + "Lou_Carnesecca"]] },
 
-  { id: "boeheim", parent: "gavitt", kind: "be", name: "Jim Boeheim", sub: "Syracuse · founding coach",
+  { id: "boeheim", parent: "gavitt", kind: "be", name: "Jim Boeheim", sub: "Syracuse · charter coach",
     bio: "Syracuse's coach from the league's first season. He learned under Roy Danforth at Syracuse. His staffs started the biggest branch in Big East history: Rick Pitino, Tim Welsh, Louis Orr and Brendan Malone all worked for him, and their lines reach five of today's eleven programs.",
     stops: [["Syracuse", "graduate assistant, then assistant under Roy Danforth", "k"], ["Syracuse", "head coach"], ["U.S. national team", "assistant under Mike Krzyzewski"]],
     src: [["Jim Boeheim (Wikipedia)", W + "Jim_Boeheim"]] },
@@ -462,14 +462,14 @@ const D = [
     stops: [["UMass Dartmouth", "assistant"], ["Stonehill", "assistant under Dave DeCiantis"], ["Rhode Island", "assistant under Al Skinner", "k"], ["Boston College", "assistant under Al Skinner", "k"], ["Head coach", "Fairfield, Providence, Georgetown"]],
     src: [["Ed Cooley (Wikipedia)", W + "Ed_Cooley"]] },
 
-  { id: "raftery", parent: "gavitt", kind: "be", name: "Bill Raftery", sub: "Seton Hall · founding coach",
+  { id: "raftery", parent: "gavitt", kind: "be", name: "Bill Raftery", sub: "Seton Hall · charter coach",
     bio: "Seton Hall's coach when the league formed. No current Big East coach traces to his staffs.",
     stops: [["Seton Hall", "head coach"]], src: [["Seton Hall seasons (Wikipedia)", W + "List_of_Seton_Hall_Pirates_men%27s_basketball_seasons"]] },
-  { id: "perno", parent: "gavitt", kind: "be", name: "Dom Perno", sub: "UConn · founding coach",
+  { id: "perno", parent: "gavitt", kind: "be", name: "Dom Perno", sub: "UConn · charter coach",
     bio: "UConn's coach when the league formed. He had been Dee Rowe's top assistant at UConn.",
     stops: [["Connecticut high schools", "head coach"], ["UConn", "assistant under Dee Rowe", "k"], ["UConn", "head coach"]],
     src: [["Dom Perno (Wikipedia)", W + "Dom_Perno"]] },
-  { id: "tdavis", parent: "gavitt", kind: "be", name: "Tom Davis", sub: "Boston College · founding coach",
+  { id: "tdavis", parent: "gavitt", kind: "be", name: "Tom Davis", sub: "Boston College · charter coach",
     bio: "Boston College's coach when the league formed, later at Iowa and Drake. His son Keno worked on his staffs at both, and that staff work, not the family tie, puts Keno on the tree.",
     stops: [["Head coach", "Boston College, Iowa, Drake, among others"]],
     src: [["Keno Davis (Wikipedia)", W + "Keno_Davis"]] },
@@ -477,7 +477,7 @@ const D = [
     bio: "Assistant under his father at Iowa and Drake, with stops at Southern Indiana and Southeast Missouri State between. Coached Drake for one season, then Providence.",
     stops: [["Iowa", "assistant under Tom Davis", "k"], ["Southern Indiana", "assistant"], ["Southeast Missouri State", "assistant"], ["Drake", "assistant under Tom Davis", "k"], ["Head coach", "Drake, Providence, Central Michigan"]],
     src: [["Keno Davis (Wikipedia)", W + "Keno_Davis"]] },
-  { id: "walters", parent: "gavitt", kind: "be", name: "Gary Walters", sub: "Providence · founding coach", also: ["carril"],
+  { id: "walters", parent: "gavitt", kind: "be", name: "Gary Walters", sub: "Providence · charter coach", also: ["carril"],
     bio: "Providence's coach when the league formed, succeeding Gavitt. He had been Pete Carril's assistant at Princeton.",
     stops: [["Middlebury", "head coach"], ["Union", "head coach"], ["Princeton", "assistant under Pete Carril", "k"], ["Dartmouth", "head coach"], ["Providence", "head coach"]],
     src: [["Gary Walters (Wikipedia)", W + "Gary_Walters"]] },
@@ -507,8 +507,8 @@ const D = [
     stops: [["Xavier", "assistant under Pete Gillen", "k"], ["Providence", "assistant under Pete Gillen", "k"], ["Virginia", "assistant under Pete Gillen", "k"], ["Head coach", "Manhattan, Seton Hall"]],
     src: [["Bobby Gonzalez (Wikipedia)", W + "Bobby_Gonzalez"]] },
 
-  { id: "outside", parent: "gavitt", kind: "grp", name: "Lines from outside", sub: "No staff link to a founding coach",
-    bio: "These Big East coaches came up on staffs that don't trace back to a founding coach. Some still cross into the main tree through later jobs, shown as dashed lines.",
+  { id: "outside", parent: "gavitt", kind: "grp", name: "Lines from outside", sub: "No staff line to a charter coach",
+    bio: "These Big East coaches came up on staffs that don't trace back to a charter coach. Some still cross into the main tree through later jobs, shown as dashed lines.",
     stops: [], src: [] },
   { id: "mullaney", parent: "outside", kind: "be", name: "Joe Mullaney", sub: "Providence",
     bio: "Gavitt learned the job as Mullaney's assistant at Providence. Mullaney later returned to coach the Friars in the Big East.",
@@ -622,7 +622,7 @@ const D = [
     stops: [["Lafayette", "assistant under Tom Davis", "k"], ["Boston College", "assistant", "k"], ["Head coach", "American, Boston College, Ohio State, Maryland"]],
     src: [["Gary Williams (Wikipedia)", W + "Gary_Williams"], ["Tom Davis (Wikipedia)", W + "Tom_Davis_(basketball_coach)"]] },
   { id: "obrien", parent: "perno", kind: "be", name: "Jim O'Brien", sub: "Boston College",
-    bio: "Dom Perno's assistant at UConn, which ties him to a founding coach. Coached St. Bonaventure, then Boston College in the Big East, then Ohio State.",
+    bio: "Dom Perno's assistant at UConn, which ties him to a charter coach. Coached St. Bonaventure, then Boston College in the Big East, then Ohio State.",
     stops: [["UConn", "assistant under Dom Perno", "k"], ["Head coach", "St. Bonaventure, Boston College, Ohio State, Emerson"]],
     src: [["Jim O'Brien (Wikipedia)", W + "Jim_O%27Brien_(basketball,_born_1950)"]] },
   { id: "hill", parent: "wright", kind: "be", name: "Fred Hill", sub: "Rutgers",
@@ -743,10 +743,10 @@ function lastName(n) { const p = n.replace(/ (Jr\.|III)$/, "").split(" "); retur
 function edgeLabel(bossId, staffId) {
   const b = byId.get(bossId), st = byId.get(staffId);
   const hits = st.stops.filter(x => x[1].includes(b.name) || (x[2] === "k" && x[1].includes(lastName(b.name))));
-  let t = hits.length ? hits.map(x => `${x[0]}: ${x[1]}`).join("; ") : (bossId === "gavitt" ? "Founding coach of the league" : `Worked under ${b.name}`);
-  if (bossId === "gavitt" && staffId !== "outside") t = "Founding-era coach (not a staff line)";
-  if (staffId === "outside") t = "Coaches with no staff line to a founding coach";
-  if (bossId === "outside") t = "No staff line back to a founding coach";
+  let t = hits.length ? hits.map(x => `${x[0]}: ${x[1]}`).join("; ") : (bossId === "gavitt" ? "Charter coach in the league's first season" : `Worked under ${b.name}`);
+  if (bossId === "gavitt" && staffId !== "outside") t = bossId === "gavitt" && byId.get(staffId).sub.includes("second season") ? "Joined in the league's second season (not a staff line)" : "Charter coach in the league's first season (not a staff line)";
+  if (staffId === "outside") t = "Coaches with no staff line to a charter coach";
+  if (bossId === "outside") t = "No staff line back to a charter coach";
   const sc = SUCC[staffId];
   const succ = sc && sc[0] === bossId ? `Took over for ${b.name} at ${sc[1]}` : "";
   const soft = SOFT.has(bossId + ">" + staffId) ? "Inferred: the source lists the job, and the dates match his tenure" : "";
@@ -948,7 +948,7 @@ function show(d) {
     ${path.length ? `<div class="crumbs">${path.map(id => `<a data-go="${id}">${esc(byId.get(id).name)}</a>`).join(" → ")} → <b>${esc(d.name)}</b></div>` : ""}
     <p class="bio">${esc(d.bio)}</p>
     ${learned.length ? `<h3>Worked under</h3><div class="chips">${learned.map(id => chip(id, SOFT.has(id + ">" + d.id))).join("")}</div>` : ""}
-    ${down.length ? `<h3>${d.kind === "grp" ? "Lines" : d.kind === "root" ? "Founding coaches and branches" : "Came off his staffs"}</h3><div class="chips">${down.map(id => chip(id, SOFT.has(d.id + ">" + id))).join("")}</div>` : ""}
+    ${down.length ? `<h3>${d.kind === "grp" ? "Lines" : d.kind === "root" ? "Charter coaches and branches" : "Came off his staffs"}</h3><div class="chips">${down.map(id => chip(id, SOFT.has(d.id + ">" + id))).join("")}</div>` : ""}
     ${d.stops.length ? `<h3>Career stops</h3><ul class="stops">${d.stops.map(([a, b, f]) => `<li class="${f || ""}"><b>${esc(a)}</b> · ${esc(b)}</li>`).join("")}</ul>` : ""}
     ${d.src.length ? `<h3>Sources</h3><div class="src">${d.src.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}`;
   p.scrollTop = 0;
