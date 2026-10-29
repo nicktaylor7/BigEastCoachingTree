@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Big East Coaching Tree</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one full-screen zoomable tree (pan, zoom, click to drill down) with a slide-in bio panel. */
+:root {
+  /* newsprint and ink */
+  --bg: #f1eee6;
+  --panel: #fbfaf5;
+  --fg: #161512;
+  --muted: #5a554b;
+  --line: #c9c2b3;
+  --accent: #c2461b;   /* spot color: current head coaches, national titles */
+  --ff: #2f7d4a;       /* Final Fours */
+  --succ: #2b5aa8;     /* took over for his boss */
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #171613; --panel: #201f1b; --fg: #ece7dc; --muted: #aaa395; --line: #45413a; --accent: #f08a50; --ff: #63c18a; --succ: #86a9ef; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #171613; --panel: #201f1b; --fg: #ece7dc; --muted: #aaa395; --line: #45413a; --accent: #f08a50; --ff: #63c18a; --succ: #86a9ef; color-scheme: dark; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 14px; overflow: hidden; }
+.app { height: 100%; display: flex; flex-direction: column; }
+.bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); }
+.bar h1 { font: 600 1.35rem var(--serif); margin: 0; letter-spacing: -.01em; }
+.bar .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: auto; }
+.bar input { font: 14px var(--sans); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; width: 210px; max-width: 100%; }
+.bar button, .chip { font: 500 13px var(--sans); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.bar button:hover, .chip:hover { border-color: var(--fg); }
+button:focus-visible, input:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 12px; align-items: center; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.legend i.sw { width: 18px; height: 12px; border-radius: 0; background: var(--panel); border: 1px solid var(--fg); border-left: 4px solid var(--fg); }
+.legend i.sw.cur { border-left-color: var(--accent); }
+.legend i.sw.men { border-color: var(--line); border-left-color: var(--line); }
+.legend s { display: inline-block; width: 20px; border-top: 1.5px dashed var(--accent); vertical-align: 3px; margin-right: 5px; }
+
+.stage { position: relative; flex: 1; min-height: 0; }
+svg#tree { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+svg#tree:active { cursor: grabbing; }
+.link { fill: none; stroke: var(--line); stroke-width: 1.6; }
+.link.found { stroke-dasharray: 3 5; }
+.link.hot { stroke: var(--fg); stroke-width: 2.2; }
+.xlink { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 6 5; }
+.node { cursor: pointer; transition: opacity .25s; }
+.node.dim { opacity: .45; }
+.node .card { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.node:hover .card { stroke: var(--muted); }
+.node.sel .card { stroke: var(--fg); stroke-width: 2; }
+.node .edge { fill: var(--line); }
+.node.be .edge, .node.root .edge { fill: var(--fg); }
+.node.cur .edge { fill: var(--accent); }
+.node.grp .card { stroke-dasharray: 4 3; }
+.node .nm { font: 600 14px var(--sans); fill: var(--fg); }
+.node.men .nm { font-weight: 500; fill: var(--muted); }
+.node.root .nm, .node.grp .nm { font-size: 15px; }
+.node .sub { font: 12px var(--sans); fill: var(--muted); }
+.node .more-bg { fill: var(--bg); stroke: var(--line); }
+.node .more { font: 600 11px var(--sans); fill: var(--fg); font-variant-numeric: tabular-nums; }
+.link.succ { stroke: var(--succ); stroke-width: 3.2; }
+.link.soft { stroke-dasharray: 2 5; stroke-linecap: round; }
+.xlink.succ { stroke: var(--succ); }
+.hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: help; }
+.node .mk { stroke-width: 1.4; }
+.node .mk.t { fill: var(--accent); stroke: var(--accent); }
+.node .mk.f { fill: var(--ff); stroke: var(--ff); }
+.tip { position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12.5px; line-height: 1.4; padding: 7px 10px; border-radius: 6px; max-width: 280px; z-index: 5; }
+.tip b { font-weight: 600; }
+.legend .mkl { display: inline-block; width: 8px; height: 8px; background: var(--ff); margin-right: 5px; vertical-align: 0; }
+.legend .mkl.t { background: var(--accent); border-radius: 50%; }
+.legend u { display: inline-block; width: 20px; height: 0; border-top: 3px solid var(--succ); vertical-align: 3px; margin-right: 5px; }
+.legend em { display: inline-block; width: 22px; height: 0; border-top: 3px dotted var(--fg); vertical-align: 3px; margin-right: 5px; }
+.stats { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.stats b { color: var(--fg); font-size: 18px; font-weight: 600; margin-right: 4px; font-variant-numeric: tabular-nums; }
+.succnote { margin-top: 10px; font-size: 13px; padding: 6px 10px; border-left: 3px solid var(--succ); background: var(--bg); }
+.node:focus { outline: none; }
+.node:focus-visible .card { stroke: var(--accent); stroke-width: 2.5; }
+
+.panel { position: absolute; top: 12px; right: max(12px, env(safe-area-inset-right, 0px)); bottom: 12px; width: 380px; max-width: calc(100% - 24px); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow-y: auto; padding: 20px 20px 24px; }
+.panel .x { position: absolute; top: 10px; right: 10px; border: 0; background: none; font-size: 20px; color: var(--muted); cursor: pointer; padding: 4px 8px; }
+.eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.panel h2 { font: 600 1.9rem/1.1 var(--serif); margin: 6px 0 4px; letter-spacing: -.01em; text-wrap: balance; }
+.panel .schools { font-weight: 500; }
+.crumbs { margin: 12px 0 0; font-size: 12px; color: var(--muted); line-height: 1.7; }
+.crumbs a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line); cursor: pointer; }
+.panel p.bio { font-size: 15px; line-height: 1.6; margin: 14px 0 0; }
+.panel h3 { font: 600 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border-left-width: 4px; }
+.chip.be, .chip.root { border-left-color: var(--fg); }
+.chip.cur { border-left-color: var(--accent); }
+.chip.men, .chip.grp { border-left-color: var(--line); }
+.chip i { font: italic 12px var(--serif); color: var(--muted); }
+.chip small { color: var(--muted); font-weight: 400; }
+.stops { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.stops li { padding-left: 10px; border-left: 2px solid var(--line); line-height: 1.45; }
+.stops li.k { border-left-color: var(--accent); }
+.stops li.k b { color: var(--accent); }
+.stops li.x { color: var(--muted); }
+.src { display: grid; gap: 4px; font-size: 12px; }
+.src a { color: var(--muted); overflow-wrap: anywhere; }
+.hint { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); bottom: 14px; font-size: 12px; color: var(--muted); background: var(--bg); padding: 4px 8px; border-radius: 6px; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: var(--panel); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+#decomp { position: absolute; inset: 0; overflow: auto; padding-block: 18px 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.dtools { position: sticky; left: 0; z-index: 2; width: max-content; max-width: calc(100vw - 32px); background: var(--bg); padding-block: 2px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 16px; color: var(--muted); font-size: 13px; }
+.dtools select { font: 14px var(--sans); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
+.dsizer { position: relative; }
+.dcols { position: absolute; left: 0; top: 0; display: flex; gap: 64px; align-items: flex-start; width: max-content; transform-origin: 0 0; }
+@media (prefers-reduced-motion: no-preference) { .dcols, .dsizer { transition: transform .5s ease, width .5s ease, height .5s ease; } }
+svg.dlinks { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+svg.dlinks path { fill: none; stroke: var(--muted); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+svg.dlinks path.on { stroke: var(--fg); stroke-width: 2.6; }
+.dcol { width: 236px; display: grid; gap: 8px; }
+.dhead { font: 600 11px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); min-height: 2.6em; display: flex; align-items: flex-end; }
+.ditem { font: inherit; color: var(--fg); text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; cursor: pointer; display: grid; gap: 4px; }
+.ditem:hover { border-color: var(--muted); }
+.ditem.on { border-color: var(--fg); box-shadow: 0 0 0 1px var(--fg); }
+.ditem .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.ditem .nm { font: 500 15px var(--serif); }
+.ditem .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ditem .sb { font-size: 11px; color: var(--muted); }
+.ditem.cur { border-left-color: var(--accent) !important; }
+.ditem.men, .ditem.grp { border-left-color: var(--line) !important; }
+.ditem .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.ditem .bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.ditem .pct { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dself { font-size: 12px; color: var(--muted); padding: 2px 4px; }
+.dleaf { font-size: 12px; color: var(--muted); padding: 2px 4px; }
+.mode-decomp #tree, .mode-decomp .hint, .mode-decomp #expand, .mode-decomp #collapse, .mode-decomp #fit, .mode-decomp .legend { display: none; }
+
+@media (max-width: 760px) {
+  .dcols { gap: 36px; }
+  #decomp { padding-bottom: 60vh; }
+  .dcol { width: 200px; }
+  .bar .tools { margin-left: 0; width: 100%; }
+  .bar input { flex: 1; width: auto; }
+  .panel { top: auto; left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); width: auto; max-width: none; max-height: 58%; }
+  .hint { display: none; }
+}
+
+/* ---------- newspaper treatment ---------- */
+.bar { border-bottom: 3px double var(--fg); padding-block: 10px 12px; }
+.mast .kicker { font: 500 10.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--fg); padding-bottom: 3px; margin-bottom: 4px; display: inline-block; }
+.bar h1 { font: 700 2rem/1 var(--serif); letter-spacing: -.02em; }
+.mast .disclaim { font: 11px var(--sans); color: var(--muted); margin-top: 3px; max-width: 46ch; }
+#others { position: absolute; inset: 0; overflow: auto; padding-block: 28px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.oinner { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
+.oinner .eyebrow { border-bottom: 1px solid var(--fg); padding-bottom: 4px; }
+.oinner h2 { font: 700 2.4rem/1.05 var(--serif); margin: 4px 0 0; letter-spacing: -.02em; }
+.olede { font: italic 17px/1.5 var(--serif); color: var(--muted); margin: 0 0 6px; }
+.site { display: grid; gap: 4px; text-decoration: none; color: var(--fg); background: var(--panel); border: 1px solid var(--fg); border-left: 4px solid var(--accent); padding: 16px 18px; }
+.site:hover { box-shadow: 5px 5px 0 var(--line); }
+.site:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sname { font: 700 1.5rem/1.1 var(--serif); }
+.sdesc { font: 16px/1.5 var(--serif); }
+.surl { font: 500 11px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.onote { font: italic 14px/1.5 var(--serif); color: var(--muted); border-top: 1px solid var(--fg); padding-top: 10px; margin: 8px 0 0; }
+.mode-others #tree, .mode-others .hint, .mode-others #expand, .mode-others #collapse, .mode-others #fit, .mode-others .legend, .mode-others #q, .mode-others #panel, .mode-others #decomp { display: none !important; }
+.mast .byline { font: italic 14px var(--serif); color: var(--muted); margin-top: 4px; }
+.bar input, .bar button, .chip, .dtools select, .seg { border-radius: 0; }
+.bar button, .chip { font: 500 12px var(--sans); letter-spacing: .04em; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.legend { font: italic 13px var(--serif); }
+.node .card { stroke: var(--fg); stroke-width: .8; }
+.node.men .card { stroke: var(--line); }
+.node .nm { font: 600 16px var(--serif); }
+.node.root .nm, .node.grp .nm { font-size: 17px; font-weight: 700; }
+.node.men .nm { font-weight: 500; font-style: italic; }
+.node .sub { font: 500 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+.node .edge { rx: 0; }
+.link { stroke: var(--muted); stroke-width: 1.6; opacity: 1; }
+.link.hot { stroke: var(--fg); stroke-width: 2; opacity: 1; }
+.link.succ { opacity: 1; }
+.tip { border-radius: 0; font: 14px/1.4 var(--serif); }
+.tip b { font-family: var(--sans); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.panel { border-radius: 0; border: 1px solid var(--fg); box-shadow: 6px 6px 0 var(--line); }
+.panel .eyebrow { border-bottom: 1px solid var(--fg); padding-bottom: 4px; }
+.panel h2 { font: 700 2.2rem/1.05 var(--serif); letter-spacing: -.02em; margin-top: 10px; }
+.panel .schools { font: italic 15px var(--serif); color: var(--muted); }
+.panel p.bio { font: 17px/1.6 var(--serif); hyphens: auto; }
+.panel p.bio::first-letter { float: left; font: 700 3.3em/.8 var(--serif); margin: .08em .08em 0 0; }
+.panel h3 { border-top: 1px solid var(--fg); padding-top: 8px; }
+.crumbs { font: italic 13px var(--serif); }
+.stops li { font: 14.5px/1.45 var(--serif); }
+.stops li b { font-weight: 600; }
+.stats b { font-family: var(--serif); font-size: 24px; }
+.succnote { font: italic 14px var(--serif); background: transparent; }
+.ditem { border-radius: 0; border-color: var(--fg); border-width: .8px; border-left-width: 4px; }
+.ditem .nm { font: 600 16px var(--serif); }
+.ditem .sb { text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
+.ditem .bar, .ditem .bar i { border-radius: 0; }
+.dhead { border-bottom: 1px solid var(--fg); padding-bottom: 3px; }
+.hint { border-radius: 0; font: italic 13px var(--serif); }
+.link.soft { stroke: var(--fg); stroke-width: 2.6; stroke-dasharray: 0.1 6; stroke-linecap: round; opacity: .85; }
+.link.soft.hot { opacity: 1; }
+
+/* ---------- phones ---------- */
+#key { display: none; }
+.peekbar { display: none; }
+@media (max-width: 760px) {
+  .bar { gap: 8px 10px; padding-block: 8px 10px; }
+  .mast .kicker { display: none; }
+  .bar h1 { font-size: 1.55rem; }
+  .mast .byline { font-size: 12.5px; margin-top: 2px; }
+  .mast .disclaim { font-size: 10px; margin-top: 2px; }
+  .legend { display: none; order: 3; width: 100%; font-size: 12.5px; gap: 6px 14px; padding: 8px 0 2px; border-top: 1px solid var(--line); }
+  .bar.show-key .legend { display: flex; }
+  .bar .tools { order: 2; gap: 6px; }
+  .seg { width: 100%; }
+  .seg button { flex: 1; }
+  #key { display: inline-block; }
+  #expand { display: none; }
+  .bar button, .seg button { min-height: 40px; padding: 8px 10px; }
+  .bar input, .dtools select { font-size: 16px; min-height: 40px; }   /* 16px stops iPhone from zooming on tap */
+  .bar input { flex: 1 1 140px; min-width: 0; }
+  .chip { min-height: 38px; }
+  .mode-decomp #collapse, .mode-decomp #fit, .mode-decomp #key, .mode-others #key { display: none; }
+  .mode-decomp .bar .legend { display: none; }
+
+  /* bio panel becomes a bottom sheet that starts as a short peek */
+  .panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: 72%; box-shadow: 0 -6px 0 var(--line); border-left: 0; border-right: 0; border-bottom: 0;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .peekbar { display: flex; justify-content: center; position: sticky; top: 0; z-index: 2; background: var(--panel); padding: 8px 0 4px; margin: 0 -16px; cursor: pointer; border: 0; width: calc(100% + 32px); }
+  .peekbar span { width: 44px; height: 4px; background: var(--muted); border-radius: 2px; }
+  .panel .x { top: 6px; right: 6px; z-index: 3; min-width: 40px; min-height: 40px; }
+  .panel.peek { max-height: calc(132px + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
+  .panel.peek::after { content: "Tap to read the full bio"; position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 16px calc(10px + env(safe-area-inset-bottom, 0px)); font: italic 13px var(--serif); color: var(--muted); text-align: center; background: linear-gradient(transparent, var(--panel) 45%); }
+  .panel h2 { font-size: 1.8rem; margin-top: 6px; }
+  .panel p.bio { font-size: 16px; }
+  .tip { max-width: calc(100vw - 32px); }
+  #decomp { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
+}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="bar">
+    <div class="mast"><div class="kicker">Men's basketball · From the founders to today</div><h1>Big East Coaching Tree</h1><div class="byline">Concept Developed by Nicholas Taylor</div><div class="disclaim">Independent fan project. Not affiliated with, endorsed by or sponsored by the NCAA or the Big East Conference.</div></div>
+    <div class="legend" id="legend">
+      <span><i class="sw cur"></i>Current head coach</span>
+      <span><i class="sw be"></i>Big East head coach</span>
+      <span><i class="sw men"></i>Mentor</span>
+      <span><span class="mkl t"></span>National title</span>
+      <span><span class="mkl"></span>Final Four</span>
+      <span><u></u>Took over for his boss</span>
+      <span><em></em>Inferred from dates</span>
+      <span><s></s>Also worked under</span>
+    </div>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-view="tree" aria-pressed="true">Tree</button>
+        <button type="button" data-view="decomp" aria-pressed="false">Breakdown</button>
+        <button type="button" data-view="others" aria-pressed="false">Other sites</button>
+      </div>
+      <input id="q" list="names" placeholder="Find a coach" aria-label="Find a coach">
+      <datalist id="names"></datalist>
+      <button id="expand" type="button">Expand all</button>
+      <button id="collapse" type="button">Collapse</button>
+      <button id="fit" type="button">Fit</button>
+      <button id="key" type="button" aria-expanded="false" aria-controls="legend">Key</button>
+    </div>
+  </header>
+  <div class="stage">
+    <svg id="tree" aria-label="Big East coaching tree"></svg>
+    <div class="tip" id="tip" hidden></div>
+    <div class="hint">Drag to pan, scroll or pinch to zoom, click a coach to open their branch</div>
+    <section id="others" hidden aria-label="Other sites">
+      <div class="oinner">
+        <div class="eyebrow">More from Nicholas Taylor</div>
+        <h2>Other sites</h2>
+        <p class="olede">More Big East men's basketball projects by Nicholas Taylor.</p>
+        <a class="site" href="https://nicktaylor7.github.io/BigEastGami/" target="_blank" rel="noopener">
+          <span class="sname">Big East Gami</span>
+          <span class="sdesc">Every final score in Big East men's basketball, with the rare and repeated scorelines called out.</span>
+          <span class="surl">nicktaylor7.github.io/BigEastGami</span>
+        </a>
+        <a class="site" href="https://nicktaylor7.github.io/BigEastBigData/" target="_blank" rel="noopener">
+          <span class="sname">Big East Big Data</span>
+          <span class="sdesc">Historical Big East men's basketball stats, from conference-wide numbers down to teams and players, with leaderboards, player comparisons and trends.</span>
+          <span class="surl">nicktaylor7.github.io/BigEastBigData</span>
+        </a>
+        <p class="onote">Independent fan project. Not affiliated with, endorsed by or sponsored by the NCAA or the Big East Conference. All team and conference names belong to their owners.</p>
+      </div>
+    </section>
+    <div id="decomp" hidden>
+      <div class="dtools">
+        <label for="meas">Count</label>
+        <select id="meas">
+          <option value="be">Big East head coaches</option>
+          <option value="cur">Current head coaches</option>
+          <option value="all">Everyone on the tree</option>
+          <option value="ti">National titles</option>
+          <option value="ff">Final Fours</option>
+        </select>
+        <span>Click a bar to split it by the coaches under it.</span>
+      </div>
+      <div class="dsizer" id="dsizer"><div class="dcols" id="dcols"></div></div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+/* kind: root | grp | cur (current Big East HC) | be (former Big East HC) | men (mentor / bridge)
+   parent = the staff line drawn as the branch; also = other coaches he worked under (dashed). */
+const W = "https://en.wikipedia.org/wiki/";
+const D = [
+  { id: "gavitt", kind: "root", name: "Dave Gavitt", sub: "Founder, first commissioner",
+    bio: "Gavitt built the Big East and ran it as its first commissioner. Before that he coached Providence, and before that he learned the job as Joe Mullaney's assistant at Providence. Every branch in this tree starts with the coaches he brought into the league.",
+    stops: [["Providence", "assistant under Joe Mullaney", "k"], ["Dartmouth", "assistant, then head coach"], ["Providence", "head coach"], ["Big East", "founder and first commissioner"]],
+    also: ["mullaney"], src: [["Dave Gavitt (Wikipedia)", W + "Dave_Gavitt"]] },
+
+  { id: "thompson", parent: "gavitt", kind: "be", name: "John Thompson", sub: "Georgetown · founding coach",
+    bio: "Georgetown's coach when the league formed, and the man who made the Hoyas a national power. Craig Esherick spent his entire career on Thompson's bench before succeeding him.",
+    stops: [["Georgetown", "head coach"]], src: [["Craig Esherick (Wikipedia)", W + "Craig_Esherick"]] },
+  { id: "esherick", parent: "thompson", kind: "be", name: "Craig Esherick", sub: "Georgetown",
+    bio: "A graduate assistant and then a longtime assistant under John Thompson. He took over when Thompson stepped down in the middle of a season.",
+    stops: [["Georgetown", "graduate assistant under John Thompson", "k"], ["Georgetown", "assistant under John Thompson", "k"], ["U.S. Olympic team", "assistant and scout"], ["Georgetown", "head coach"]],
+    src: [["Craig Esherick (Wikipedia)", W + "Craig_Esherick"]] },
+
+  { id: "carnesecca", parent: "gavitt", kind: "be", name: "Lou Carnesecca", sub: "St. John's · founding coach",
+    bio: "St. John's coach when the league formed. He learned as Joe Lapchick's assistant at St. John's before taking over the program, with a detour to coach the ABA's New York Nets.",
+    stops: [["St. Ann's Academy", "high school head coach"], ["St. John's", "assistant under Joe Lapchick", "k"], ["St. John's", "head coach"], ["New York Nets (ABA)", "head coach"], ["St. John's", "head coach again"]],
+    src: [["Lou Carnesecca (Wikipedia)", W + "Lou_Carnesecca"]] },
+  { id: "mahoney", parent: "carnesecca", kind: "be", name: "Brian Mahoney", sub: "St. John's",
+    bio: "Two long stints as a St. John's assistant during Carnesecca's run, split by a head job at Manhattan. Succeeded Carnesecca at St. John's.",
+    stops: [["St. John's", "assistant under Lou Carnesecca", "k"], ["Manhattan", "head coach"], ["St. John's", "assistant under Lou Carnesecca", "k"], ["St. John's", "head coach"]],
+    src: [["Brian Mahoney (Wikipedia)", W + "Brian_Mahoney_(basketball)"], ["Lou Carnesecca (Wikipedia)", W + "Lou_Carnesecca"]] },
+
+  { id: "boeheim", parent: "gavitt", kind: "be", name: "Jim Boeheim", sub: "Syracuse · founding coach",
+    bio: "Syracuse's coach from the league's first season. He learned under Roy Danforth at Syracuse. His staffs started the biggest branch in Big East history: Rick Pitino, Tim Welsh, Louis Orr and Brendan Malone all worked for him, and their lines reach five of today's eleven programs.",
+    stops: [["Syracuse", "graduate assistant, then assistant under Roy Danforth", "k"], ["Syracuse", "head coach"], ["U.S. national team", "assistant under Mike Krzyzewski"]],
+    src: [["Jim Boeheim (Wikipedia)", W + "Jim_Boeheim"]] },
+  { id: "rpitino", parent: "boeheim", kind: "cur", name: "Rick Pitino", sub: "Providence · Louisville · St. John's",
+    bio: "Boeheim's first assistant at Syracuse, then Hubie Brown's assistant with the Knicks. He has coached three Big East programs, Providence, Louisville and now St. John's, and his staffs fan out into almost every corner of today's league.",
+    stops: [["Hawaii", "graduate assistant, then assistant"], ["Syracuse", "assistant under Jim Boeheim", "k"], ["Boston University", "head coach"], ["New York Knicks", "assistant under Hubie Brown"], ["Head coach", "Providence, Knicks, Kentucky, Celtics, Louisville, Iona, St. John's"]],
+    src: [["Rick Pitino (Wikipedia)", W + "Rick_Pitino"]] },
+  { id: "chiesa", parent: "rpitino", kind: "be", name: "Gordon Chiesa", sub: "Providence",
+    bio: "Pitino's assistant at Providence, then the Friars' head coach for one season after Pitino left. Rick Barnes replaced him. He went on to a long run as a Utah Jazz assistant.",
+    stops: [["Dartmouth", "assistant"], ["Manhattan", "head coach"], ["Providence", "assistant under Rick Pitino", "k"], ["Providence", "head coach"], ["Utah Jazz", "assistant under Jerry Sloan"]],
+    src: [["Gordon Chiesa (Wikipedia)", W + "Gordon_Chiesa"]] },
+  { id: "donovan", parent: "rpitino", kind: "men", name: "Billy Donovan", sub: "Florida",
+    bio: "Played for Pitino at Providence, which doesn't count. What counts is his time on Pitino's Kentucky staff. His Florida staffs produced Shaka Smart and employed Richard Pitino and, later, Norm Roberts.",
+    stops: [["Kentucky", "assistant under Rick Pitino", "k"], ["Marshall", "head coach"], ["Florida", "head coach, two national titles"]],
+    src: [["Florida staff feature (FloridaGators.com)", "https://floridagators.com/news/2014/4/5/27856.aspx"], ["OnlyGators", "https://www.onlygators.com/?p=10974"]] },
+  { id: "smart", parent: "donovan", kind: "cur", name: "Shaka Smart", sub: "Marquette", also: ["purnell"],
+    bio: "His last assistant job was on Billy Donovan's Florida staff. Before that he worked twice for Oliver Purnell, who later coached DePaul in the Big East.",
+    stops: [["California (Pa.)", "assistant under Bill Brown"], ["Dayton", "director of operations under Oliver Purnell", "k"], ["Akron", "assistant under Keith Dambrot"], ["Clemson", "assistant under Oliver Purnell", "k"], ["Florida", "assistant under Billy Donovan", "k"], ["Head coach", "VCU, Texas, Marquette"]],
+    src: [["Shaka Smart bio (FloridaGators.com)", "https://floridagators.com/sports/mens-basketball/roster/coaches/shaka-smart/396"], ["Smart named Clemson assistant", "https://clemsontigers.com/?p=9140"]] },
+  { id: "richard", parent: "rpitino", kind: "cur", name: "Richard Pitino", sub: "Xavier", also: ["donovan"],
+    bio: "Rick's son, but family alone doesn't count. He's on the tree because he worked on his father's Louisville staff twice, with a stint on Billy Donovan's Florida staff in between.",
+    stops: [["College of Charleston", "administrative assistant"], ["Northeastern", "assistant"], ["Duquesne", "assistant under Ron Everhart"], ["Louisville", "assistant under Rick Pitino", "k"], ["Florida", "assistant under Billy Donovan", "k"], ["Louisville", "associate head coach under Rick Pitino", "k"], ["Head coach", "FIU, Minnesota, New Mexico, Xavier"]],
+    src: [["Richard Pitino bio (FloridaGators.com)", "https://floridagators.com/sports/mens-basketball/roster/coaches/richard-pitino/394"]] },
+  { id: "willard", parent: "rpitino", kind: "cur", name: "Kevin Willard", sub: "Seton Hall · Villanova",
+    bio: "Ten years on Pitino's staffs with the Celtics and at Louisville. He has coached two Big East schools, Seton Hall and now Villanova. His father Ralph also worked for Pitino.",
+    stops: [["Boston Celtics", "coaching associate under Rick Pitino", "k"], ["Louisville", "assistant, then associate head coach under Rick Pitino", "k"], ["Head coach", "Iona, Seton Hall, Maryland, Villanova"]],
+    src: [["Kevin Willard (Wikipedia)", W + "Kevin_Willard"]] },
+  { id: "holloway", parent: "willard", kind: "cur", name: "Shaheen Holloway", sub: "Seton Hall",
+    bio: "Eleven seasons on Kevin Willard's staffs at Iona and Seton Hall, then took Saint Peter's to the Elite Eight as a No. 15 seed before succeeding Willard at Seton Hall.",
+    stops: [["Seton Hall", "administrative assistant under Bobby Gonzalez"], ["Iona", "assistant under Kevin Willard", "k"], ["Seton Hall", "assistant, then associate head coach under Kevin Willard", "k"], ["Saint Peter's", "head coach"], ["Seton Hall", "head coach"]],
+    also: ["gonzalez"], src: [["Seton Hall hires Holloway (ESPN)", "https://africa.espn.com/mens-college-basketball/story/_/id/33632481/seton-hall-hires-shaheen-holloway-new-men-basketball-coach-historic-run-saint-peters"]] },
+  { id: "sendek", parent: "rpitino", kind: "men", name: "Herb Sendek", sub: "Miami (Ohio) · NC State",
+    bio: "A Providence assistant who followed Pitino to Kentucky. As a head coach he hired Thad Matta at Miami (Ohio) and Sean Miller at Miami and NC State, which ties the whole Butler and Xavier line back to Pitino and Boeheim.",
+    stops: [["Providence", "graduate assistant, then assistant"], ["Kentucky", "assistant under Rick Pitino", "k"], ["Head coach", "Miami (Ohio), NC State, Arizona State, Santa Clara"]],
+    src: [["Herb Sendek (Wikipedia)", W + "Herb_Sendek"]] },
+  { id: "matta", parent: "sendek", kind: "be", name: "Thad Matta", sub: "Butler",
+    bio: "Worked for Barry Collier at Butler and for Herb Sendek at Miami (Ohio). His own staffs at Butler, Xavier and Ohio State became the source of Butler's and Xavier's Big East coaches.",
+    stops: [["Indiana State", "graduate assistant under Tates Locke"], ["Butler", "staff under Barry Collier"], ["Miami (Ohio)", "assistant under Herb Sendek", "k"], ["Western Carolina", "assistant under Phil Hopkins"], ["Miami (Ohio)", "assistant under Charlie Coles"], ["Butler", "assistant under Barry Collier"], ["Head coach", "Butler, Xavier, Ohio State, Butler again"]],
+    src: [["Thad Matta (Wikipedia)", W + "Thad_Matta"]] },
+  { id: "lickliter", parent: "matta", kind: "men", name: "Todd Lickliter", sub: "Butler · Iowa",
+    bio: "Matta's assistant at Butler and then his successor there. LaVall Jordan worked for him at Butler and followed him to Iowa. He also promoted Brad Stevens to full-time assistant.",
+    stops: [["Butler", "assistant under Thad Matta", "k"], ["Head coach", "Butler, Iowa"]],
+    src: [["Butler Way feature (FOX59)", "https://digital-release.fox59.com/?p=61084"]] },
+  { id: "jordan", parent: "lickliter", kind: "be", name: "LaVall Jordan", sub: "Butler",
+    bio: "Assistant under Todd Lickliter at Butler and Iowa, then under John Beilein at Michigan. Coached Milwaukee before returning to Butler as head coach.",
+    stops: [["Butler", "assistant under Todd Lickliter", "k"], ["Iowa", "assistant under Todd Lickliter", "k"], ["Michigan", "assistant under John Beilein"], ["Milwaukee", "head coach"], ["Butler", "head coach"], ["DePaul", "assistant"]],
+    src: [["LaVall Jordan (Wikipedia)", W + "LaVall_Jordan"]] },
+  { id: "groce", parent: "matta", kind: "men", name: "John Groce", sub: "Ohio",
+    bio: "A Matta assistant who made Chris Holtmann his first hire as Ohio University's head coach.",
+    stops: [["Matta staffs", "assistant under Thad Matta", "k"], ["Ohio", "head coach"]],
+    src: [["Holtmann hired at Ohio State (The Lantern)", "https://thelantern.com/?p=138515"]] },
+  { id: "holtmann", parent: "groce", kind: "cur", name: "Chris Holtmann", sub: "Butler · DePaul", also: ["bmiller"],
+    bio: "Never worked for Matta himself, but two of his bosses did: John Groce at Ohio and Brandon Miller at Butler. He has led two Big East programs and replaced Matta at Ohio State in between.",
+    stops: [["Taylor and Geneva", "graduate assistant, then assistant"], ["Gardner-Webb", "assistant, then associate head coach"], ["Ohio", "assistant under John Groce", "k"], ["Gardner-Webb", "head coach"], ["Butler", "assistant under Brandon Miller", "k"], ["Head coach", "Butler, Ohio State, DePaul"]],
+    src: [["Holtmann bio (Butler)", "https://butlersports.com/sports/mens-basketball/roster/coaches/chris-holtmann/8"]] },
+  { id: "bmiller", parent: "matta", kind: "be", name: "Brandon Miller", sub: "Butler",
+    bio: "Spent six seasons on Matta's Ohio State staff, then took over Butler for its first Big East season and hired Chris Holtmann as an assistant.",
+    stops: [["Ohio State", "assistant and director of operations under Thad Matta", "k"], ["Butler", "head coach"]],
+    src: [["Butler hires Miller (IBJ)", "https://www.ibj.com/articles/42324-butler-hires-assistant-coach-miller-to-replace-stevens"]] },
+  { id: "stevens", parent: "matta", kind: "men", name: "Brad Stevens", sub: "Butler · Celtics", also: ["lickliter"],
+    bio: "Quit a corporate job to join Matta's Butler staff in an operations role, became a full-time assistant under Todd Lickliter, then took Butler to two national title games. As Celtics coach he hired Ronald Nored.",
+    stops: [["Butler", "operations coordinator under Thad Matta", "k"], ["Butler", "assistant under Todd Lickliter", "k"], ["Head coach", "Butler, Boston Celtics"]],
+    src: [["Brad Stevens (Wikipedia)", W + "Brad_Stevens"]] },
+  { id: "nored", parent: "stevens", kind: "cur", name: "Ronald Nored", sub: "Butler",
+    bio: "Playing for Stevens doesn't count. Working for him does: Stevens brought Nored into the Celtics organization, first with its G League team and then on the Boston staff. Years of NBA bench work followed before Butler hired him to replace Matta.",
+    stops: [["Brownsburg HS", "head coach"], ["South Alabama", "assistant under Matthew Graves, briefly"], ["Maine Red Claws", "assistant, hired by Brad Stevens", "k"], ["Boston Celtics", "player development under Brad Stevens", "k"], ["Northern Kentucky", "assistant"], ["Long Island Nets", "G League head coach"], ["NBA assistant", "Hornets, Pacers under Rick Carlisle, Hawks under Quin Snyder"], ["Butler", "head coach"]],
+    src: [["Nored bio (Butler)", "https://butlersports.com/staff-directory/ronald-nored-12/719"]] },
+  { id: "smiller", parent: "matta", kind: "be", name: "Sean Miller", sub: "Xavier", also: ["sendek", "rwillard"],
+    bio: "Three Pitino-tree lines meet in him: he worked for Herb Sendek at Miami (Ohio) and NC State, for Ralph Willard at Pitt, and for Thad Matta at Xavier. He coached Xavier twice, including its Big East years.",
+    stops: [["Miami (Ohio)", "assistant under Herb Sendek", "k"], ["Pittsburgh", "assistant under Ralph Willard", "k"], ["NC State", "assistant under Herb Sendek", "k"], ["Xavier", "associate head coach under Thad Matta", "k"], ["Head coach", "Xavier, Arizona, Xavier again, Texas"]],
+    src: [["Sean Miller (Wikipedia)", W + "Sean_Miller"]] },
+  { id: "mack", parent: "smiller", kind: "be", name: "Chris Mack", sub: "Xavier",
+    bio: "Worked for Skip Prosser at Xavier and Wake Forest, then for Sean Miller at Xavier before succeeding him and leading the Musketeers into the Big East.",
+    stops: [["Xavier", "staff under Skip Prosser"], ["Wake Forest", "assistant under Skip Prosser"], ["Xavier", "assistant under Sean Miller", "k"], ["Head coach", "Xavier, Louisville, Charleston, South Florida"]],
+    src: [["Chris Mack (Wikipedia)", W + "Chris_Mack_(basketball)"]] },
+  { id: "steele", parent: "mack", kind: "be", name: "Travis Steele", sub: "Xavier", also: ["smiller"],
+    bio: "Hired at Xavier by Sean Miller, kept by Chris Mack and promoted to associate head coach, then named Mack's successor.",
+    stops: [["Indiana", "video coordinator, then assistant under Kelvin Sampson"], ["Xavier", "assistant under Sean Miller and Chris Mack", "k"], ["Xavier", "associate head coach under Chris Mack", "k"], ["Head coach", "Xavier, Miami (Ohio)"]],
+    src: [["Travis Steele (Wikipedia)", W + "Travis_Steele"]] },
+  { id: "rwillard", parent: "rpitino", kind: "be", name: "Ralph Willard", sub: "Pittsburgh",
+    bio: "Pitino's assistant with the Knicks, at Kentucky and later at Louisville. As a head coach he employed Tom Crean and Sean Miller. He is Kevin Willard's father, but that isn't what puts Kevin on the tree.",
+    stops: [["New York Knicks", "assistant under Rick Pitino", "k"], ["Kentucky", "assistant under Rick Pitino", "k"], ["Head coach", "Western Kentucky, Pittsburgh, Holy Cross"], ["Louisville", "assistant under Rick Pitino", "k"]],
+    src: [["Ralph Willard bio (GoCards)", "https://gocards.com/sports/mens-basketball/roster/coaches/ralph-willard/243"]] },
+  { id: "crean", parent: "rwillard", kind: "be", name: "Tom Crean", sub: "Marquette", also: ["izzo"],
+    bio: "Associate head coach under Ralph Willard at Western Kentucky and Pitt, then Tom Izzo's assistant at Michigan State. He led Marquette into the Big East and hired Buzz Williams.",
+    stops: [["Michigan State", "graduate assistant under Jud Heathcote"], ["Western Kentucky", "associate head coach under Ralph Willard", "k"], ["Pittsburgh", "associate head coach under Ralph Willard", "k"], ["Michigan State", "assistant under Tom Izzo"], ["Head coach", "Marquette, Indiana, Georgia"]],
+    src: [["Tom Crean (Wikipedia)", W + "Tom_Crean_(basketball)"]] },
+  { id: "buzz", parent: "crean", kind: "be", name: "Buzz Williams", sub: "Marquette",
+    bio: "Billy Gillispie's assistant at Texas A&M, a one-year head coach at New Orleans, then Crean's assistant at Marquette. Promoted when Crean left for Indiana.",
+    stops: [["Texas A&M", "assistant under Billy Gillispie"], ["New Orleans", "head coach"], ["Marquette", "assistant under Tom Crean", "k"], ["Marquette", "head coach"]],
+    src: [["Marquette promotes aide (Lawrence Journal-World)", "https://www2.ljworld.com/news/2008/apr/08/marquette_promotes_aide/"]] },
+  { id: "cronin", parent: "rpitino", kind: "be", name: "Mick Cronin", sub: "Cincinnati",
+    bio: "On Pitino's first Louisville staff. He coached Cincinnati in the Big East, where Tony Stubblefield worked for him, and later moved to UCLA.",
+    stops: [["Louisville", "assistant under Rick Pitino", "k"], ["Head coach", "Murray State, Cincinnati, UCLA"]],
+    src: [["Pitino completes Cardinals staff (GoCards)", "https://gocards.com/news/2001/4/19/Pitino_Completes_Cardinals_Basketball_Staff"]] },
+  { id: "stubblefield", parent: "cronin", kind: "be", name: "Tony Stubblefield", sub: "DePaul",
+    bio: "Worked for Lou Henson at New Mexico State, for Mick Cronin at Cincinnati and for more than a decade under Dana Altman at Oregon before DePaul hired him.",
+    stops: [["New Mexico State", "assistant under Lou Henson"], ["Cincinnati", "staff under Mick Cronin", "k"], ["Oregon", "assistant, then associate head coach under Dana Altman"], ["DePaul", "head coach"]],
+    src: [["Stubblefield introduced (DePaul)", "https://depaulbluedemons.com/news/2021/5/21/mens-basketball-passionate-stubblefield-ready-to-rekindle-depauls-glory-days"]] },
+  { id: "welsh", parent: "boeheim", kind: "be", name: "Tim Welsh", sub: "Providence",
+    bio: "Worked for Pat Kennedy at Iona and Florida State, then for Boeheim at Syracuse. Coached Iona before a long run at Providence.",
+    stops: [["Iona", "volunteer assistant under Pat Kennedy"], ["Florida State", "assistant under Pat Kennedy"], ["Syracuse", "assistant under Jim Boeheim", "k"], ["Iona", "assistant under his father, Jerry Welsh (family, not counted)", "x"], ["Head coach", "Iona, Providence"]],
+    src: [["Tim Welsh (Wikipedia)", W + "Tim_Welsh"]] },
+  { id: "orr", parent: "boeheim", kind: "be", name: "Louis Orr", sub: "Seton Hall", also: ["gillen"],
+    bio: "A Syracuse great who came back as Boeheim's assistant after working for Pete Gillen at Providence. Coached Siena and Seton Hall, and later worked on Patrick Ewing's Georgetown staff.",
+    stops: [["Xavier", "assistant"], ["Providence", "assistant under Pete Gillen", "k"], ["Syracuse", "assistant under Jim Boeheim", "k"], ["Head coach", "Siena, Seton Hall, Bowling Green"], ["Georgetown", "assistant under Patrick Ewing"]],
+    src: [["Louis Orr (Wikipedia)", W + "Louis_Orr"]] },
+  { id: "malone", parent: "boeheim", kind: "men", name: "Brendan Malone", sub: "Rhode Island",
+    bio: "Six seasons as Boeheim's assistant, then Rhode Island's head coach, where Al Skinner was on his staff. Spent most of his career as an NBA assistant.",
+    stops: [["Syracuse", "assistant under Jim Boeheim", "k"], ["Rhode Island", "head coach"], ["NBA", "longtime assistant; Raptors head coach"]],
+    src: [["Brendan Malone (Wikipedia)", W + "Brendan_Malone"]] },
+  { id: "skinner", parent: "malone", kind: "be", name: "Al Skinner", sub: "Boston College",
+    bio: "A Rhode Island assistant under Brendan Malone and then Tom Penders before taking over the Rams. Coached Boston College in the Big East. Ed Cooley spent ten years on his staffs.",
+    stops: [["Marist", "assistant"], ["Rhode Island", "assistant under Brendan Malone and Tom Penders", "k"], ["Head coach", "Rhode Island, Boston College, Kennesaw State"]],
+    src: [["Al Skinner (Wikipedia)", W + "Al_Skinner"], ["Brendan Malone (Wikipedia)", W + "Brendan_Malone"]] },
+  { id: "cooley", parent: "skinner", kind: "cur", name: "Ed Cooley", sub: "Providence · Georgetown",
+    bio: "Ten seasons on Al Skinner's staffs at Rhode Island and Boston College. He rebuilt his hometown Providence program, then moved to Georgetown.",
+    stops: [["UMass Dartmouth", "assistant"], ["Stonehill", "assistant under Dave DeCiantis"], ["Rhode Island", "assistant under Al Skinner", "k"], ["Boston College", "assistant under Al Skinner", "k"], ["Head coach", "Fairfield, Providence, Georgetown"]],
+    src: [["Ed Cooley (Wikipedia)", W + "Ed_Cooley"]] },
+
+  { id: "raftery", parent: "gavitt", kind: "be", name: "Bill Raftery", sub: "Seton Hall · founding coach",
+    bio: "Seton Hall's coach when the league formed. No current Big East coach traces to his staffs.",
+    stops: [["Seton Hall", "head coach"]], src: [["Seton Hall seasons (Wikipedia)", W + "List_of_Seton_Hall_Pirates_men%27s_basketball_seasons"]] },
+  { id: "perno", parent: "gavitt", kind: "be", name: "Dom Perno", sub: "UConn · founding coach",
+    bio: "UConn's coach when the league formed. He had been Dee Rowe's top assistant at UConn.",
+    stops: [["Connecticut high schools", "head coach"], ["UConn", "assistant under Dee Rowe", "k"], ["UConn", "head coach"]],
+    src: [["Dom Perno (Wikipedia)", W + "Dom_Perno"]] },
+  { id: "tdavis", parent: "gavitt", kind: "be", name: "Tom Davis", sub: "Boston College · founding coach",
+    bio: "Boston College's coach when the league formed, later at Iowa and Drake. His son Keno worked on his staffs at both, and that staff work, not the family tie, puts Keno on the tree.",
+    stops: [["Head coach", "Boston College, Iowa, Drake, among others"]],
+    src: [["Keno Davis (Wikipedia)", W + "Keno_Davis"]] },
+  { id: "keno", parent: "tdavis", kind: "be", name: "Keno Davis", sub: "Providence",
+    bio: "Assistant under his father at Iowa and Drake, with stops at Southern Indiana and Southeast Missouri State between. Coached Drake for one season, then Providence.",
+    stops: [["Iowa", "assistant under Tom Davis", "k"], ["Southern Indiana", "assistant"], ["Southeast Missouri State", "assistant"], ["Drake", "assistant under Tom Davis", "k"], ["Head coach", "Drake, Providence, Central Michigan"]],
+    src: [["Keno Davis (Wikipedia)", W + "Keno_Davis"]] },
+  { id: "walters", parent: "gavitt", kind: "be", name: "Gary Walters", sub: "Providence · founding coach", also: ["carril"],
+    bio: "Providence's coach when the league formed, succeeding Gavitt. He had been Pete Carril's assistant at Princeton.",
+    stops: [["Middlebury", "head coach"], ["Union", "head coach"], ["Princeton", "assistant under Pete Carril", "k"], ["Dartmouth", "head coach"], ["Providence", "head coach"]],
+    src: [["Gary Walters (Wikipedia)", W + "Gary_Walters"]] },
+
+  { id: "massimino", parent: "gavitt", kind: "be", name: "Rollie Massimino", sub: "Villanova · joined second season",
+    bio: "Villanova came aboard in the league's second season. Massimino had been Chuck Daly's assistant at Penn. He won a national title, and his staffs produced Steve Lappas, Jay Wright and Pete Gillen.",
+    stops: [["New Jersey high schools", "assistant, then head coach"], ["Stony Brook", "head coach"], ["Penn", "assistant under Chuck Daly", "k"], ["Head coach", "Villanova, UNLV, Cleveland State, Northwood/Keiser"]],
+    src: [["Rollie Massimino (Wikipedia)", W + "Rollie_Massimino"]] },
+  { id: "lappas", parent: "massimino", kind: "be", name: "Steve Lappas", sub: "Villanova",
+    bio: "Massimino's assistant at Villanova, then Manhattan's head coach, then back to succeed his old boss.",
+    stops: [["Truman HS (N.Y.)", "head coach"], ["Villanova", "assistant under Rollie Massimino", "k"], ["Head coach", "Manhattan, Villanova, UMass"]],
+    src: [["Steve Lappas (Wikipedia)", W + "Steve_Lappas"]] },
+  { id: "wright", parent: "massimino", kind: "be", name: "Jay Wright", sub: "Villanova",
+    bio: "Massimino's assistant at Villanova and UNLV, head coach at Hofstra, then two national titles at Villanova. More than a dozen of his assistants became head coaches, including Kyle Neptune.",
+    stops: [["Drexel", "assistant"], ["Villanova", "assistant under Rollie Massimino", "k"], ["UNLV", "assistant under Rollie Massimino", "k"], ["Head coach", "Hofstra, Villanova"]],
+    src: [["Jay Wright (Wikipedia)", W + "Jay_Wright_(basketball)"]] },
+  { id: "neptune", parent: "wright", kind: "be", name: "Kyle Neptune", sub: "Villanova",
+    bio: "Started as Jay Wright's video coordinator, coached at Niagara, then returned as Wright's longest-tenured assistant. Coached Fordham before succeeding Wright.",
+    stops: [["Villanova", "video coordinator under Jay Wright", "k"], ["Niagara", "assistant"], ["Villanova", "assistant under Jay Wright", "k"], ["Head coach", "Fordham, Villanova"]],
+    src: [["Villanova hires Neptune (CBS Sports)", "https://www.cbssports.com/college-basketball/news/villanova-hires-kyle-neptune-fordham-coach-former-wildcats-assistant-will-succeed-jay-wright"]] },
+  { id: "gillen", parent: "massimino", kind: "be", name: "Pete Gillen", sub: "Providence",
+    bio: "A Massimino assistant at Villanova, then Digger Phelps's assistant at Notre Dame. As a head coach he employed Bobby Gonzalez and Louis Orr, both later Seton Hall head coaches.",
+    stops: [["Hawaii", "assistant"], ["VMI", "assistant"], ["Villanova", "assistant under Rollie Massimino", "k"], ["Notre Dame", "assistant under Digger Phelps"], ["Head coach", "Xavier, Providence, Virginia"]],
+    src: [["Pete Gillen (Wikipedia)", W + "Pete_Gillen"]] },
+  { id: "gonzalez", parent: "gillen", kind: "be", name: "Bobby Gonzalez", sub: "Seton Hall",
+    bio: "Followed Pete Gillen from Xavier to Providence to Virginia as an assistant, then built Manhattan before Seton Hall hired him. Shaheen Holloway worked in his Seton Hall office.",
+    stops: [["Xavier", "assistant under Pete Gillen", "k"], ["Providence", "assistant under Pete Gillen", "k"], ["Virginia", "assistant under Pete Gillen", "k"], ["Head coach", "Manhattan, Seton Hall"]],
+    src: [["Bobby Gonzalez (Wikipedia)", W + "Bobby_Gonzalez"]] },
+
+  { id: "outside", parent: "gavitt", kind: "grp", name: "Lines from outside", sub: "No staff link to a founding coach",
+    bio: "These Big East coaches came up on staffs that don't trace back to a founding coach. Some still cross into the main tree through later jobs, shown as dashed lines.",
+    stops: [], src: [] },
+  { id: "mullaney", parent: "outside", kind: "be", name: "Joe Mullaney", sub: "Providence",
+    bio: "Gavitt learned the job as Mullaney's assistant at Providence. Mullaney later returned to coach the Friars in the Big East.",
+    stops: [["Providence", "head coach, with Dave Gavitt on staff"], ["Providence", "head coach again"]],
+    src: [["Dave Gavitt (Wikipedia)", W + "Dave_Gavitt"], ["Joe Mullaney returns home (UPI)", "https://www.upi.com/Archives/1981/04/07/Joe-Mullaney-Returns-Home/7475355467600/"]] },
+  { id: "calhoun", parent: "outside", kind: "be", name: "Jim Calhoun", sub: "UConn",
+    bio: "Built UConn into a national champion. Dave Leitao and Kevin Ollie came off his staffs, and George Blaney joined him after coaching Seton Hall.",
+    stops: [["Head coach", "Northeastern, UConn"]],
+    src: [["Dave Leitao (Wikipedia)", W + "Dave_Leitao"], ["Kevin Ollie (Wikipedia)", W + "Kevin_Ollie"]] },
+  { id: "ollie", parent: "calhoun", kind: "be", name: "Kevin Ollie", sub: "UConn",
+    bio: "Played for Calhoun, then joined his staff after a long NBA career and succeeded him, winning a national title.",
+    stops: [["UConn", "assistant under Jim Calhoun", "k"], ["UConn", "head coach"], ["Brooklyn Nets", "assistant under Jacque Vaughn, then interim head coach"]],
+    src: [["Kevin Ollie (Wikipedia)", W + "Kevin_Ollie"]] },
+  { id: "leitao", parent: "calhoun", kind: "be", name: "Dave Leitao", sub: "DePaul",
+    bio: "Calhoun's assistant at Northeastern and UConn across three stints. He coached DePaul twice, including its Big East years.",
+    stops: [["Northeastern", "assistant under Jim Calhoun", "k"], ["UConn", "assistant under Jim Calhoun", "k"], ["Northeastern", "head coach"], ["UConn", "assistant under Jim Calhoun", "k"], ["Head coach", "DePaul, Virginia, DePaul again"]],
+    src: [["Dave Leitao (Wikipedia)", W + "Dave_Leitao"]] },
+  { id: "blaney", parent: "calhoun", kind: "be", name: "George Blaney", sub: "Seton Hall",
+    bio: "A longtime Holy Cross coach who led Seton Hall, then spent years as Calhoun's assistant head coach at UConn. His staff link came after his Big East head job.",
+    stops: [["Head coach", "Stonehill, Dartmouth, Holy Cross, Seton Hall"], ["UConn", "assistant head coach under Jim Calhoun", "k"]],
+    src: [["George Blaney (Wikipedia)", W + "George_Blaney"]] },
+  { id: "bannon", parent: "outside", kind: "be", name: "Kevin Bannon", sub: "Rutgers",
+    bio: "Rutgers head coach who gave Dan Hurley his only college assistant job. From Bannon runs a four-generation line to Providence's Bryan Hodgson.",
+    stops: [["Head coach", "Trenton State, Rider, Rutgers"]], src: [["Dan Hurley (NJ Sports)", "https://njsports.com/dan-hurley/"]] },
+  { id: "dhurley", parent: "bannon", kind: "cur", name: "Dan Hurley", sub: "UConn",
+    bio: "His father, Bob Hurley Sr., doesn't count. Dan's college staff job was four seasons under Kevin Bannon at Rutgers. He then built St. Benedict's Prep, Wagner and Rhode Island before two national titles at UConn. His brother Bobby learned on his staff.",
+    stops: [["St. Anthony HS", "assistant to his father (family, not counted)", "x"], ["Rutgers", "assistant under Kevin Bannon", "k"], ["St. Benedict's Prep", "head coach"], ["Head coach", "Wagner, Rhode Island, UConn"]],
+    src: [["Dan Hurley (Wikipedia)", W + "Dan_Hurley"]] },
+  { id: "bhurley", parent: "dhurley", kind: "men", name: "Bobby Hurley", sub: "Buffalo · Arizona State",
+    bio: "Dan's older brother, but family isn't the link: he spent three seasons as Dan's assistant at Wagner and Rhode Island. At Buffalo he hired Nate Oats.",
+    stops: [["Wagner", "assistant under Dan Hurley", "k"], ["Rhode Island", "assistant under Dan Hurley", "k"], ["Head coach", "Buffalo, Arizona State"]],
+    src: [["Hurleys bonded by basketball (PressReader)", "https://www.pressreader.com/usa/the-news-times/20181002/281805694868039"], ["Dan Hurley (Wikipedia)", W + "Dan_Hurley"]] },
+  { id: "oats", parent: "bhurley", kind: "men", name: "Nate Oats", sub: "Buffalo · Alabama",
+    bio: "A Michigan high school coach whom Bobby Hurley brought to Buffalo as an assistant. Took over Buffalo, then Alabama. Bryan Hodgson was his lead recruiter at both.",
+    stops: [["Romulus HS (Mich.)", "head coach"], ["Buffalo", "assistant under Bobby Hurley", "k"], ["Head coach", "Buffalo, Alabama"]],
+    src: [["Nate Oats (Wikipedia)", W + "Nate_Oats"]] },
+  { id: "hodgson", parent: "oats", kind: "cur", name: "Bryan Hodgson", sub: "Providence",
+    bio: "Eight seasons on Nate Oats's staffs at Buffalo and Alabama, which makes him Dan Hurley's great-grandchild on this tree. Won conference titles at Arkansas State and South Florida before Providence hired him to replace Kim English.",
+    stops: [["Fredonia State", "assistant"], ["Jamestown CC", "assistant"], ["Midland College", "assistant"], ["Buffalo", "assistant under Nate Oats", "k"], ["Alabama", "assistant under Nate Oats", "k"], ["Head coach", "Arkansas State, South Florida, Providence"]],
+    src: [["Hodgson bio (South Florida)", "https://gousfbulls.com/staff-directory/bryan-hodgson/2227"], ["Hodgson bio (Providence)", "https://friars.com/staff-directory/bryan-hodgson/676"]] },
+  { id: "barnes", parent: "outside", kind: "be", name: "Rick Barnes", sub: "Providence",
+    bio: "Came up under Eddie Biedenbach at Davidson and Wimp Sanderson at Alabama, among others. Replaced Gordon Chiesa at Providence. Fran Fraschilla worked for him there, and Kim English worked for him at Tennessee.",
+    stops: [["Davidson", "assistant under Eddie Biedenbach"], ["George Mason", "assistant"], ["Alabama", "assistant under Wimp Sanderson"], ["Ohio State", "assistant"], ["Head coach", "George Mason, Providence, Clemson, Texas, Tennessee"]],
+    src: [["Rick Barnes (Wikipedia)", W + "Rick_Barnes"]] },
+  { id: "fraschilla", parent: "barnes", kind: "be", name: "Fran Fraschilla", sub: "St. John's",
+    bio: "A long run as an assistant, finishing on Rick Barnes's Providence staff. Built Manhattan, then coached St. John's.",
+    stops: [["Rhode Island", "assistant under Jack Kraft"], ["Ohio", "assistant under Danny Nee and Billy Hahn"], ["Ohio State", "assistant under Gary Williams"], ["Providence", "assistant under Rick Barnes", "k"], ["Head coach", "Manhattan, St. John's, New Mexico"]],
+    src: [["Fran Fraschilla (Wikipedia)", W + "Fran_Fraschilla"]] },
+  { id: "english", parent: "barnes", kind: "be", name: "Kim English", sub: "Providence", also: ["haith"],
+    bio: "Assistant under Frank Haith at Tulsa, Tad Boyle at Colorado and Rick Barnes at Tennessee. Coached George Mason, then Providence until Bryan Hodgson replaced him.",
+    stops: [["Tulsa", "assistant under Frank Haith", "k"], ["Colorado", "assistant under Tad Boyle"], ["Tennessee", "assistant under Rick Barnes", "k"], ["Head coach", "George Mason, Providence"]],
+    src: [["Kim English (Wikipedia)", W + "Kim_English_(basketball)"]] },
+  { id: "carril", parent: "outside", kind: "men", name: "Pete Carril", sub: "Princeton",
+    bio: "Princeton's longtime coach. Two Big East head coaches worked for him: Gary Walters, Providence's coach when the league began, and John Thompson III.",
+    stops: [["Head coach", "Princeton"]], src: [["Gary Walters (Wikipedia)", W + "Gary_Walters"], ["Thompson III profile (NBC News)", "https://www.nbcnews.com/news/amp/wbna4933694"]] },
+  { id: "jt3", parent: "carril", kind: "be", name: "John Thompson III", sub: "Georgetown",
+    bio: "His father doesn't count, and he never worked on his father's staff. His line runs through Pete Carril, who brought him back to Princeton as an assistant.",
+    stops: [["Princeton", "assistant under Pete Carril", "k"], ["Head coach", "Princeton, Georgetown"]],
+    src: [["Thompson III profile (NBC News)", "https://www.nbcnews.com/news/amp/wbna4933694"]] },
+  { id: "coachk", parent: "outside", kind: "men", name: "Mike Krzyzewski", sub: "Duke",
+    bio: "Duke's coach. Tommy Amaker and Steve Wojciechowski both worked on his staff before coaching in the Big East. Boeheim was his assistant with the U.S. national team.",
+    stops: [["Head coach", "Army, Duke, U.S. national team"]], src: [["Tommy Amaker (Wikipedia)", W + "Tommy_Amaker"]] },
+  { id: "amaker", parent: "coachk", kind: "be", name: "Tommy Amaker", sub: "Seton Hall",
+    bio: "A graduate assistant and then assistant under Mike Krzyzewski at Duke, rising to associate head coach before Seton Hall hired him.",
+    stops: [["Duke", "graduate assistant, then assistant and associate head coach under Mike Krzyzewski", "k"], ["Head coach", "Seton Hall, Michigan, Harvard"]],
+    src: [["Tommy Amaker (Wikipedia)", W + "Tommy_Amaker"]] },
+  { id: "wojo", parent: "coachk", kind: "be", name: "Steve Wojciechowski", sub: "Marquette",
+    bio: "Played for and then spent years as an assistant under Mike Krzyzewski at Duke before Marquette hired him.",
+    stops: [["Duke", "assistant under Mike Krzyzewski", "k"], ["Marquette", "head coach"]], src: [] },
+  { id: "self", parent: "outside", kind: "men", name: "Bill Self", sub: "Kansas",
+    bio: "Norm Roberts worked for him at Oral Roberts, Tulsa, Illinois and Kansas before and after his St. John's job.",
+    stops: [["Head coach", "Oral Roberts, Tulsa, Illinois, Kansas"]], src: [["Norm Roberts (Wikipedia)", W + "Norm_Roberts"]] },
+  { id: "roberts", parent: "self", kind: "be", name: "Norm Roberts", sub: "St. John's", also: ["donovan"],
+    bio: "Bill Self's assistant at three schools before St. John's. Afterward he worked a season for Billy Donovan at Florida, a later crossing into the Pitino line, then rejoined Self at Kansas.",
+    stops: [["Queens College", "head coach"], ["Oral Roberts, Tulsa, Illinois, Kansas", "assistant under Bill Self", "k"], ["St. John's", "head coach"], ["Florida", "assistant under Billy Donovan"], ["Kansas", "assistant under Bill Self"]],
+    src: [["Norm Roberts (Wikipedia)", W + "Norm_Roberts"]] },
+  { id: "harrick", parent: "outside", kind: "men", name: "Jim Harrick", sub: "UCLA",
+    bio: "UCLA's coach when Steve Lavin was on his staff.", stops: [["Head coach", "UCLA, among others"]], src: [["Steve Lavin (Wikipedia)", W + "Steve_Lavin"]] },
+  { id: "lavin", parent: "harrick", kind: "be", name: "Steve Lavin", sub: "St. John's",
+    bio: "Gene Keady's assistant at Purdue, then Jim Harrick's at UCLA before succeeding Harrick. Later rebuilt St. John's.",
+    stops: [["Purdue", "assistant under Gene Keady"], ["UCLA", "assistant under Jim Harrick", "k"], ["Head coach", "UCLA, St. John's, San Diego"]],
+    src: [["Steve Lavin (Wikipedia)", W + "Steve_Lavin"]] },
+  { id: "richardson", parent: "outside", kind: "men", name: "Nolan Richardson", sub: "Tulsa · Arkansas",
+    bio: "Mike Anderson spent two decades on his staffs at Tulsa and Arkansas.", stops: [["Head coach", "Tulsa, Arkansas"]], src: [["Mike Anderson (Wikipedia)", W + "Mike_Anderson_(basketball,_born_1959)"]] },
+  { id: "anderson", parent: "richardson", kind: "be", name: "Mike Anderson", sub: "St. John's",
+    bio: "Nolan Richardson's assistant at Tulsa and Arkansas, then head coach at UAB, Missouri and Arkansas before St. John's.",
+    stops: [["Tulsa", "assistant under Nolan Richardson", "k"], ["Arkansas", "assistant under Nolan Richardson", "k"], ["Head coach", "UAB, Missouri, Arkansas, St. John's"]],
+    src: [["Mike Anderson (Wikipedia)", W + "Mike_Anderson_(basketball,_born_1959)"]] },
+  { id: "driesell", parent: "outside", kind: "men", name: "Lefty Driesell", sub: "Maryland",
+    bio: "Oliver Purnell worked for him at Maryland.", stops: [["Head coach", "Davidson, Maryland, James Madison, Georgia State"]], src: [["Oliver Purnell (Wikipedia)", W + "Oliver_Purnell"]] },
+  { id: "purnell", parent: "driesell", kind: "be", name: "Oliver Purnell", sub: "DePaul",
+    bio: "Lefty Driesell's assistant at Maryland. As a head coach he twice employed Shaka Smart, at Dayton and Clemson, which crosses into the Pitino line through Smart.",
+    stops: [["Old Dominion", "graduate assistant, then assistant"], ["Maryland", "assistant under Lefty Driesell", "k"], ["Head coach", "Radford, Old Dominion, Dayton, Clemson, DePaul"]],
+    src: [["Oliver Purnell (Wikipedia)", W + "Oliver_Purnell"]] },
+  { id: "odom", parent: "outside", kind: "men", name: "Dave Odom", sub: "Wake Forest",
+    bio: "Jerry Wainwright spent nine seasons on his Wake Forest staff.", stops: [["Head coach", "Wake Forest, among others"]], src: [["Jerry Wainwright (Wikipedia)", W + "Jerry_Wainwright"]] },
+  { id: "wainwright", parent: "odom", kind: "be", name: "Jerry Wainwright", sub: "DePaul",
+    bio: "Bob Staak's assistant at Xavier and Dave Odom's at Wake Forest. Coached UNC Wilmington and Richmond before DePaul.",
+    stops: [["Xavier", "assistant under Bob Staak"], ["Wake Forest", "assistant under Dave Odom", "k"], ["Head coach", "UNC Wilmington, Richmond, DePaul"]],
+    src: [["Jerry Wainwright (Wikipedia)", W + "Jerry_Wainwright"]] },
+  { id: "mcdermott", parent: "outside", kind: "be", name: "Greg McDermott", sub: "Creighton",
+    bio: "A North Dakota assistant before head jobs at Wayne State, North Dakota State, Northern Iowa and Iowa State. Led Creighton through its Big East era and handed it to Alan Huss.",
+    stops: [["North Dakota", "assistant"], ["Head coach", "Wayne State, North Dakota State, Northern Iowa, Iowa State, Creighton"]],
+    src: [["Greg McDermott (Wikipedia)", W + "Greg_McDermott"]] },
+  { id: "huss", parent: "mcdermott", kind: "cur", name: "Alan Huss", sub: "Creighton",
+    bio: "Two stints on Greg McDermott's Creighton staff around a successful run at High Point, then promoted when McDermott retired. His playing days at Creighton came before McDermott and don't count.",
+    stops: [["Indiana high schools", "assistant, then head coach"], ["New Mexico", "assistant"], ["Creighton", "assistant under Greg McDermott", "k"], ["High Point", "head coach"], ["Creighton", "associate head coach under Greg McDermott", "k"], ["Creighton", "head coach"]],
+    src: [["Huss bio (Creighton)", "https://gocreighton.com/staff.aspx?staff=236"]] },
+  { id: "gwilliams", parent: "tdavis", kind: "be", name: "Gary Williams", sub: "Boston College",
+    bio: "Played for Tom Davis at Maryland, then worked as Davis's assistant at Lafayette before following him to Boston College. Later succeeded him there, then coached Ohio State and won a national title at Maryland.",
+    stops: [["Lafayette", "assistant under Tom Davis", "k"], ["Boston College", "assistant", "k"], ["Head coach", "American, Boston College, Ohio State, Maryland"]],
+    src: [["Gary Williams (Wikipedia)", W + "Gary_Williams"], ["Tom Davis (Wikipedia)", W + "Tom_Davis_(basketball_coach)"]] },
+  { id: "obrien", parent: "perno", kind: "be", name: "Jim O'Brien", sub: "Boston College",
+    bio: "Dom Perno's assistant at UConn, which ties him to a founding coach. Coached St. Bonaventure, then Boston College in the Big East, then Ohio State.",
+    stops: [["UConn", "assistant under Dom Perno", "k"], ["Head coach", "St. Bonaventure, Boston College, Ohio State, Emerson"]],
+    src: [["Jim O'Brien (Wikipedia)", W + "Jim_O%27Brien_(basketball,_born_1950)"]] },
+  { id: "hill", parent: "wright", kind: "be", name: "Fred Hill", sub: "Rutgers",
+    bio: "One of more than a dozen Jay Wright assistants who became head coaches. He took over Rutgers.",
+    stops: [["Villanova", "assistant under Jay Wright", "k"], ["Rutgers", "head coach"]],
+    src: [["Jay Wright (Wikipedia)", W + "Jay_Wright_(basketball)"]] },
+  { id: "chipman", parent: "outside", kind: "be", name: "Roy Chipman", sub: "Pittsburgh",
+    bio: "Pitt's coach when the Panthers joined the league, after head jobs at Hartwick and Lafayette. Seth Greenberg worked on his Pitt staff.",
+    stops: [["Head coach", "Hartwick, Lafayette, Pittsburgh"]], src: [["Roy Chipman (Wikipedia)", W + "Roy_Chipman"]] },
+  { id: "greenberg", parent: "chipman", kind: "be", name: "Seth Greenberg", sub: "Virginia Tech",
+    bio: "A long climb as an assistant, including Roy Chipman's Pitt staff and Terry Holland's at Virginia. Coached Long Beach State and South Florida, then Virginia Tech in its Big East season.",
+    stops: [["Columbia", "assistant under Buddy Mahar"], ["Pittsburgh", "assistant under Roy Chipman", "k"], ["Virginia", "assistant under Terry Holland"], ["Miami (Fla.)", "assistant under Bill Foster"], ["Long Beach State", "assistant under Joe Harrington"], ["Head coach", "Long Beach State, South Florida, Virginia Tech"]],
+    src: [["Seth Greenberg (Wikipedia)", W + "Seth_Greenberg"]] },
+  { id: "evans", parent: "outside", kind: "be", name: "Paul Evans", sub: "Pittsburgh",
+    bio: "Came to Pitt from Navy, where he coached David Robinson. John Calipari was one of his Pitt assistants.",
+    stops: [["Head coach", "St. Lawrence, Navy, Pittsburgh"]], src: [["Paul Evans (Wikipedia)", W + "Paul_Evans_(basketball)"]] },
+  { id: "howland", parent: "outside", kind: "be", name: "Ben Howland", sub: "Pittsburgh",
+    bio: "A longtime UC Santa Barbara assistant under Jerry Pimm. Built Northern Arizona and then Pitt, where Jamie Dixon was his top assistant and successor.",
+    stops: [["Gonzaga", "graduate assistant under Jay Hillock"], ["UC Santa Barbara", "assistant under Ed DeLacy and Jerry Pimm"], ["Head coach", "Northern Arizona, Pittsburgh, UCLA, Mississippi State"]],
+    src: [["Ben Howland (Wikipedia)", W + "Ben_Howland"]] },
+  { id: "dixon", parent: "howland", kind: "be", name: "Jamie Dixon", sub: "Pittsburgh",
+    bio: "Followed Ben Howland from Northern Arizona to Pitt as an assistant and took over when Howland left for UCLA. Mike Rice worked on his Pitt staff.",
+    stops: [["Hawaii", "assistant"], ["Northern Arizona", "assistant under Ben Howland", "k"], ["Hawaii", "assistant under Riley Wallace"], ["Pittsburgh", "assistant under Ben Howland", "k"], ["Head coach", "Pittsburgh, TCU"]],
+    src: [["Jamie Dixon (Wikipedia)", W + "Jamie_Dixon"]] },
+  { id: "rice", parent: "dixon", kind: "be", name: "Mike Rice", sub: "Rutgers",
+    bio: "A long run of assistant jobs that ended on Jamie Dixon's Pitt staff. Coached Robert Morris, then Rutgers.",
+    stops: [["Fordham, Marquette, Niagara, Chicago State, Saint Joseph's", "assistant"], ["Pittsburgh", "assistant under Jamie Dixon", "k"], ["Head coach", "Robert Morris, Rutgers"]],
+    src: [["Mike Rice Jr. (Wikipedia)", W + "Mike_Rice_Jr."]] },
+  { id: "wenzel", parent: "outside", kind: "be", name: "Bob Wenzel", sub: "Rutgers",
+    bio: "An assistant at Utah, Yale, Duke and South Carolina, then Jacksonville's head coach before leading Rutgers into the Big East.",
+    stops: [["Utah, Yale, Duke, South Carolina", "assistant"], ["Head coach", "Jacksonville, Rutgers"]], src: [["Bob Wenzel (Wikipedia)", W + "Bob_Wenzel"]] },
+  { id: "waters", parent: "outside", kind: "be", name: "Gary Waters", sub: "Rutgers",
+    bio: "Two decades as an assistant at Ferris State and Eastern Michigan, then head coach at Kent State, Rutgers and Cleveland State.",
+    stops: [["Ferris State", "assistant"], ["Eastern Michigan", "assistant, then associate head coach"], ["Head coach", "Kent State, Rutgers, Cleveland State"]], src: [["Gary Waters (Wikipedia)", W + "Gary_Waters"]] },
+  { id: "hamilton", parent: "outside", kind: "be", name: "Leonard Hamilton", sub: "Miami",
+    bio: "Joe B. Hall's assistant and associate head coach at Kentucky for over a decade. Built Miami into a Big East program before long runs elsewhere, ending at Florida State.",
+    stops: [["Austin Peay", "assistant"], ["Kentucky", "assistant and associate head coach under Joe B. Hall"], ["Head coach", "Oklahoma State, Miami, Washington Wizards, Florida State"]], src: [["Leonard Hamilton (Wikipedia)", W + "Leonard_Hamilton"]] },
+  { id: "pclark", parent: "outside", kind: "be", name: "Perry Clark", sub: "Miami",
+    bio: "An assistant at Penn State and Georgia Tech, then Tulane's head coach before succeeding Leonard Hamilton at Miami.",
+    stops: [["Penn State", "assistant"], ["Georgia Tech", "assistant"], ["Head coach", "Tulane, Miami, Texas A&M–Corpus Christi"]], src: [["Perry Clark (Wikipedia)", W + "Perry_Clark"]] },
+  { id: "catlett", parent: "driesell", kind: "be", name: "Gale Catlett", sub: "West Virginia",
+    bio: "Worked for Lefty Driesell at Davidson, Ted Owens at Kansas and Adolph Rupp at Kentucky. Coached Cincinnati, then his alma mater West Virginia, including its first Big East years.",
+    stops: [["Richmond", "assistant under Lew Mills"], ["Davidson", "assistant under Lefty Driesell", "k"], ["Kansas", "assistant under Ted Owens"], ["Kentucky", "assistant under Adolph Rupp"], ["Head coach", "Cincinnati, West Virginia"]],
+    src: [["Gale Catlett (Wikipedia)", W + "Gale_Catlett"]] },
+  { id: "beilein", parent: "outside", kind: "be", name: "John Beilein", sub: "West Virginia",
+    bio: "Climbed through high school, junior college and small-college head jobs without a major assistant stop. Coached West Virginia in the Big East before Michigan.",
+    stops: [["Head coach", "Erie CC, Nazareth, Le Moyne, Canisius, Richmond, West Virginia, Michigan"]], src: [] },
+  { id: "huggins", parent: "outside", kind: "be", name: "Bob Huggins", sub: "West Virginia",
+    bio: "A West Virginia graduate assistant and Ohio State assistant under Eldon Miller. Made his name at Cincinnati, then came home to coach West Virginia in the Big East.",
+    stops: [["West Virginia", "graduate assistant under Joedy Gardner"], ["Ohio State", "assistant under Eldon Miller"], ["Head coach", "Walsh, Akron, Cincinnati, Kansas State, West Virginia"]], src: [["Bob Huggins (Wikipedia)", W + "Bob_Huggins"]] },
+  { id: "macleod", parent: "outside", kind: "be", name: "John MacLeod", sub: "Notre Dame",
+    bio: "Coached Oklahoma and spent years as an NBA head coach, mostly with the Phoenix Suns, before taking Notre Dame into the Big East.",
+    stops: [["Head coach", "Oklahoma, Phoenix Suns, Dallas Mavericks, New York Knicks, Notre Dame"]], src: [["John MacLeod (Wikipedia)", W + "John_MacLeod_(basketball)"]] },
+  { id: "rwilliams", parent: "outside", kind: "men", name: "Roy Williams", sub: "Kansas",
+    bio: "Matt Doherty spent seven seasons as an assistant at Kansas during Williams's tenure.", stops: [["Head coach", "Kansas, North Carolina"]],
+    src: [["Notre Dame hires Doherty (CBS News)", "https://www.cbsnews.com/news/notre-dame-hoops-hires-doherty/"]] },
+  { id: "doherty", parent: "rwilliams", kind: "be", name: "Matt Doherty", sub: "Notre Dame",
+    bio: "A Davidson assistant, then seven seasons on the Kansas staff before one year at Notre Dame and a move to North Carolina.",
+    stops: [["Davidson", "assistant"], ["Kansas", "assistant under Roy Williams", "k"], ["Head coach", "Notre Dame, North Carolina, Florida Atlantic, SMU"]],
+    src: [["Notre Dame hires Doherty (CBS News)", "https://www.cbsnews.com/news/notre-dame-hoops-hires-doherty/"]] },
+  { id: "brey", parent: "coachk", kind: "be", name: "Mike Brey", sub: "Notre Dame",
+    bio: "Morgan Wootten's assistant at DeMatha, then Mike Krzyzewski's at Duke. Coached Delaware before a long run at Notre Dame.",
+    stops: [["DeMatha Catholic HS", "assistant under Morgan Wootten"], ["Duke", "assistant under Mike Krzyzewski", "k"], ["Head coach", "Delaware, Notre Dame"], ["Atlanta Hawks", "assistant under Quin Snyder"]],
+    src: [["Mike Brey (Wikipedia)", W + "Mike_Brey"]] },
+  { id: "kruger", parent: "outside", kind: "men", name: "Lon Kruger", sub: "Florida · Illinois",
+    bio: "Robert McCullum worked for him at Kansas State, Florida and Illinois.", stops: [["Head coach", "Kansas State, Florida, Illinois, UNLV, Oklahoma, among others"]],
+    src: [["Robert McCullum (Wikipedia)", W + "Robert_McCullum"]] },
+  { id: "mccullum", parent: "kruger", kind: "be", name: "Robert McCullum", sub: "South Florida",
+    bio: "Lon Kruger's assistant at three schools, then Western Michigan's head coach before taking South Florida into the Big East.",
+    stops: [["Kansas State, Florida, Illinois", "assistant under Lon Kruger", "k"], ["Head coach", "Western Michigan, South Florida, Florida A&M"], ["Oregon", "assistant under Dana Altman"]],
+    src: [["Robert McCullum (Wikipedia)", W + "Robert_McCullum"]] },
+  { id: "izzo", parent: "outside", kind: "men", name: "Tom Izzo", sub: "Michigan State",
+    bio: "Stan Heath and Tom Crean both worked on his Michigan State staff before coaching in the Big East.", stops: [["Head coach", "Michigan State"]],
+    src: [["Tom Crean (Wikipedia)", W + "Tom_Crean_(basketball)"], ["Izzo on Heath hire (Yahoo)", "https://www.yahoo.com/now/emu-hires-stan-heath-mens-035300766.html"]] },
+  { id: "heath", parent: "izzo", kind: "be", name: "Stan Heath", sub: "South Florida",
+    bio: "Tom Izzo's assistant at Michigan State, then head coach at Kent State and Arkansas before South Florida.",
+    stops: [["Small-college assistant jobs", "Hillsdale, Albion, Wayne State, Bowling Green"], ["Michigan State", "assistant under Tom Izzo", "k"], ["Head coach", "Kent State, Arkansas, South Florida, Eastern Michigan"]],
+    src: [["Stan Heath (Wikipedia)", W + "Stan_Heath"]] },
+  { id: "haith", parent: "barnes", kind: "men", name: "Frank Haith", sub: "Miami · Missouri · Tulsa",
+    bio: "An assistant for Dave Odom at Wake Forest and Rick Barnes at Texas, then a head coach at Miami after it left the Big East, Missouri and Tulsa. Kim English started his coaching career on Haith's Tulsa staff.",
+    stops: [["Wake Forest", "assistant under Dave Odom"], ["Texas", "assistant under Rick Barnes", "k"], ["Head coach", "Miami, Missouri, Tulsa"]], also: ["odom"],
+    src: [["Frank Haith (Wikipedia)", W + "Frank_Haith"], ["Kim English (Wikipedia)", W + "Kim_English_(basketball)"]] },
+  { id: "stokes", parent: "barnes", kind: "be", name: "Ricky Stokes", sub: "Virginia Tech", also: ["odom"],
+    bio: "An assistant at Wake Forest during Dave Odom's tenure and at Texas in Rick Barnes's first season there. Coached Virginia Tech into the Big East.",
+    stops: [["Wake Forest", "assistant under Dave Odom"], ["Texas", "assistant under Rick Barnes", "k"], ["Head coach", "Virginia Tech, East Carolina"]],
+    src: [["Ricky Stokes (Wikipedia)", W + "Ricky_Stokes"]] },
+  { id: "carlesimo", parent: "outside", kind: "be", name: "P.J. Carlesimo", sub: "Seton Hall",
+    bio: "A Fordham assistant before head jobs at Wagner and Seton Hall, where he reached a national title game. Went on to a long NBA career.",
+    stops: [["Fordham", "assistant"], ["Head coach", "New Hampshire College, Wagner, Seton Hall"], ["NBA", "head coach and assistant"]],
+    src: [["P.J. Carlesimo (Wikipedia)", W + "P._J._Carlesimo"]] },
+  { id: "jarvis", parent: "outside", kind: "be", name: "Mike Jarvis", sub: "St. John's",
+    bio: "An assistant at Northeastern and Harvard, then a high school coach, before head jobs at Boston University, George Washington and St. John's.",
+    stops: [["Northeastern", "assistant"], ["Harvard", "assistant"], ["Head coach", "Cambridge Rindge and Latin, Boston University, George Washington, St. John's, Florida Atlantic"]],
+    src: [["Mike Jarvis (Wikipedia)", W + "Mike_Jarvis"]] },
+  { id: "ewing", parent: "outside", kind: "be", name: "Patrick Ewing", sub: "Georgetown",
+    bio: "Georgetown's greatest player came back as head coach after years as an NBA assistant. Playing for John Thompson doesn't count as a staff line. Louis Orr worked on his staff.",
+    stops: [["NBA", "assistant"], ["Georgetown", "head coach"]], src: [["Louis Orr (Wikipedia)", W + "Louis_Orr"]] },
+  { id: "mullin", parent: "outside", kind: "be", name: "Chris Mullin", sub: "St. John's",
+    bio: "St. John's great who went from an NBA front office straight to coaching his alma mater, with no assistant stop to trace.",
+    stops: [["St. John's", "head coach"]], src: [] }
+];
+
+/* NCAA results as a head coach (official; vacated appearances excluded): [Final Fours, national titles] */
+const RES = { gavitt: [1, 0], thompson: [3, 1], carnesecca: [1, 0], boeheim: [5, 1], rpitino: [5, 1], donovan: [4, 2], smart: [1, 0],
+  matta: [2, 0], stevens: [2, 0], crean: [1, 0], cronin: [1, 0], massimino: [1, 1], wright: [4, 2], calhoun: [4, 3], ollie: [1, 1],
+  dhurley: [3, 2], oats: [1, 0], barnes: [1, 0], jt3: [1, 0], coachk: [13, 5], self: [3, 2], harrick: [1, 1], richardson: [3, 1],
+  carlesimo: [1, 0], gwilliams: [2, 1], howland: [3, 0], huggins: [2, 0], beilein: [2, 0], rwilliams: [9, 3], kruger: [2, 0], izzo: [8, 1] };
+/* staff member who later took over his boss's program: protege -> [boss, school] */
+const SUCC = { gavitt: ["mullaney", "Providence"], esherick: ["thompson", "Georgetown"], mahoney: ["carnesecca", "St. John's"], chiesa: ["rpitino", "Providence"],
+  holloway: ["willard", "Seton Hall"], lickliter: ["matta", "Butler"], stevens: ["lickliter", "Butler"], smiller: ["matta", "Xavier"], mack: ["smiller", "Xavier"],
+  steele: ["mack", "Xavier"], holtmann: ["bmiller", "Butler"], lappas: ["massimino", "Villanova"], neptune: ["wright", "Villanova"], buzz: ["crean", "Marquette"],
+  dixon: ["howland", "Pittsburgh"], ollie: ["calhoun", "UConn"], huss: ["mcdermott", "Creighton"], gwilliams: ["tdavis", "Boston College"],
+  keno: ["tdavis", "Drake"], oats: ["bhurley", "Buffalo"], lavin: ["harrick", "UCLA"] };
+/* links inferred by matching assistant years to the head coach at the time: "boss>staff" */
+const SOFT = new Set(["carnesecca>mahoney", "malone>skinner", "barnes>haith", "odom>haith", "barnes>stokes", "odom>stokes", "dixon>rice", "rwilliams>doherty", "coachk>wojo"]);
+D.forEach(d => { const r = RES[d.id] || [0, 0]; d.ff = r[0]; d.ti = r[1]; });
+function lastName(n) { const p = n.replace(/ (Jr\.|III)$/, "").split(" "); return p[p.length - 1]; }
+function edgeLabel(bossId, staffId) {
+  const b = byId.get(bossId), st = byId.get(staffId);
+  const hits = st.stops.filter(x => x[1].includes(b.name) || (x[2] === "k" && x[1].includes(lastName(b.name))));
+  let t = hits.length ? hits.map(x => `${x[0]}: ${x[1]}`).join("; ") : (bossId === "gavitt" ? "Founding coach of the league" : `Worked under ${b.name}`);
+  if (bossId === "gavitt" && staffId !== "outside") t = "Founding-era coach (not a staff line)";
+  if (staffId === "outside") t = "Coaches with no staff line to a founding coach";
+  if (bossId === "outside") t = "No staff line back to a founding coach";
+  const sc = SUCC[staffId];
+  const succ = sc && sc[0] === bossId ? `Took over for ${b.name} at ${sc[1]}` : "";
+  const soft = SOFT.has(bossId + ">" + staffId) ? "Inferred: the source lists the job, and the dates match his tenure" : "";
+  return { t, succ, soft };
+}
+
+/* ---------- build ---------- */
+const byId = new Map(D.map(d => [d.id, d]));
+D.forEach(d => { d.kids = []; d.also = d.also || []; d.alsoTo = []; });
+D.forEach(d => { if (d.parent) byId.get(d.parent).kids.push(d); });
+D.forEach(d => d.also.forEach(a => byId.get(a).alsoTo.push(d.id)));
+const root = d3.hierarchy(byId.get("gavitt"), d => d.kids);
+const nodeById = new Map();
+root.each(n => { n._children = n.children || null; nodeById.set(n.data.id, n); });
+root.each(n => { if (n.depth >= 1) n.children = null; });
+/* card widths, measured once */
+const mctx = document.createElement("canvas").getContext("2d");
+function textW(t, font) { mctx.font = font; return mctx.measureText(t).width; }
+function measure() {
+  /* every coach, including ones inside collapsed branches */
+  nodeById.forEach(n => {
+    const big = n.data.kind === "root" || n.data.kind === "grp";
+    n.nw = textW(n.data.name, `600 ${big ? 17 : 16}px Newsreader, Georgia, serif`);
+    const marks = n.data.ff ? 10 + n.data.ff * 10 : 0;
+    n.w = Math.ceil(Math.max(n.nw + marks, textW(n.data.sub.toUpperCase(), `500 10.5px "Public Sans", Arial, sans-serif`) * 1.08) + 26);
+  });
+}
+measure();
+
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let DUR = 0;
+const svg = d3.select("#tree");
+const g = svg.append("g");
+const gX = g.append("g"), gL = g.append("g"), gH = g.append("g"), gN = g.append("g");
+const CH = 46; /* card height */
+const layout = d3.tree().nodeSize([60, 310]).separation((a, b) => a.parent === b.parent ? 1 : 1.3);
+const zoom = d3.zoom().scaleExtent([0.15, 2.5]).on("zoom", e => g.attr("transform", e.transform));
+svg.call(zoom).on("dblclick.zoom", null);
+let selected = null;
+
+const diag = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+function countAll(n) { let c = 0; (n._children || []).forEach(k => { c += 1 + countAll(k); }); return c; }
+function countHidden(n) { return n.children ? 0 : countAll(n); }
+function lineageIds(id) { const s = new Set(); let n = nodeById.get(id); while (n) { s.add(n.data.id); n = n.parent; } return s; }
+
+function related(id) {
+  const out = new Set(); if (!id) return out;
+  let n = nodeById.get(id); while (n) { out.add(n.data.id); n = n.parent; }
+  nodeById.get(id).descendants().forEach(d => out.add(d.data.id));
+  return out;
+}
+function update(src) {
+  layout(root);
+  const nodes = root.descendants(), links = root.links();
+  const vis = new Map(nodes.map(n => [n.data.id, n]));
+  const lin = selected ? lineageIds(selected) : new Set();
+  const rel = related(selected);
+  const s0 = src || root;
+  const sx = s0.x0 ?? s0.x, sy = s0.y0 ?? s0.y;
+  const P = (n, out) => ({ x: n.x, y: out ? n.y + n.w : n.y });
+  const collapsedAt = () => { const p = nodeById.get(s0.data.id); return { x: p.x, y: p.y + p.w }; };
+
+  gL.selectAll("path.link").data(links, d => d.target.data.id).join(
+    en => en.append("path").attr("class", "link").attr("d", () => { const p = { x: sx, y: sy + (s0.w || 0) }; return diag({ source: p, target: p }); }),
+    up => up,
+    ex => ex.transition().duration(DUR).attr("d", () => { const p = collapsedAt(); return diag({ source: p, target: p }); }).remove()
+  ).classed("found", d => d.source.depth === 0)
+   .classed("hot", d => lin.has(d.target.data.id) && lin.has(d.source.data.id) && d.source.depth > 0)
+   .classed("succ", d => (SUCC[d.target.data.id] || [])[0] === d.source.data.id)
+   .classed("soft", d => SOFT.has(d.source.data.id + ">" + d.target.data.id))
+   .transition().duration(DUR).attr("d", d => diag({ source: P(d.source, true), target: P(d.target, false) }));
+  const hits = links.map(d => ({ k: d.target.data.id, a: d.source.data.id, b: d.target.data.id, s: d.source, t: d.target }));
+
+  const xl = [];
+  if (selected) {
+    const sd = byId.get(selected), sn = vis.get(selected);
+    if (sn) {
+      sd.also.forEach(a => { const m = vis.get(a); if (m) xl.push({ k: a + ">" + selected, s: m, t: sn }); });
+      sd.alsoTo.forEach(b => { const m = vis.get(b); if (m) xl.push({ k: selected + ">" + b, s: sn, t: m }); });
+    }
+  }
+  gX.selectAll("path.xlink").data(xl, d => d.k).join("path").attr("class", "xlink")
+    .classed("succ", d => (SUCC[d.t.data.id] || [])[0] === d.s.data.id)
+    .attr("d", d => diag({ source: P(d.s, true), target: P(d.t, false) }));
+  xl.forEach(d => hits.push({ k: "x" + d.k, a: d.s.data.id, b: d.t.data.id, s: d.s, t: d.t }));
+  gH.selectAll("path.hit").data(hits, d => d.k).join("path").attr("class", "hit")
+    .attr("d", d => diag({ source: P(d.s, true), target: P(d.t, false) }))
+    .style("display", DUR ? "none" : null)
+    .on("mouseenter mousemove", (ev, d) => showTip(ev, d)).on("mouseleave", hideTip)
+    .on("click", (ev, d) => { ev.stopPropagation(); showTip(ev, d); clearTimeout(window.__tipT); window.__tipT = setTimeout(hideTip, 3500); });
+  if (DUR) setTimeout(() => gH.selectAll("path.hit").style("display", null), DUR + 20);
+
+  const ns = gN.selectAll("g.node").data(nodes, d => d.data.id).join(
+    en => {
+      const e = en.append("g").attr("class", d => `node ${d.data.kind}`).attr("transform", `translate(${sy},${sx})`).style("opacity", 0)
+        .attr("tabindex", 0).attr("role", "button").attr("aria-label", d => d.data.name)
+        .on("click", (ev, d) => click(d)).on("keydown", (ev, d) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); click(d); } });
+      e.append("rect").attr("class", "card").attr("x", 0).attr("y", -CH / 2).attr("height", CH).attr("rx", 1).attr("width", d => d.w);
+      e.append("rect").attr("class", "edge").attr("x", 0).attr("y", -CH / 2).attr("width", 4).attr("height", CH);
+      e.append("text").attr("class", "nm").attr("x", 14).attr("y", -3).text(d => d.data.name);
+      e.append("text").attr("class", "sub").attr("x", 14).attr("y", 14).text(d => d.data.sub);
+      e.each(function (d) {
+        const ff = d.data.ff, ti = d.data.ti; if (!ff) return;
+        const gm = d3.select(this).append("g").attr("class", "marks").attr("transform", `translate(${14 + d.nw + 12},-7)`);
+        gm.append("title").text(`${ti} national title${ti === 1 ? "" : "s"}, ${ff} Final Four${ff === 1 ? "" : "s"}`);
+        for (let i = 0; i < ff; i++) {
+          if (i < ti) gm.append("circle").attr("class", "mk t").attr("cx", i * 10).attr("r", 3.8);
+          else gm.append("rect").attr("class", "mk f").attr("x", i * 10 - 3.5).attr("y", -3.5).attr("width", 7).attr("height", 7);
+        }
+      });
+      const m = e.append("g").attr("class", "moreg");
+      m.append("rect").attr("class", "more-bg").attr("rx", 9).attr("height", 18).attr("y", -9);
+      m.append("text").attr("class", "more").attr("y", 4);
+      return e;
+    },
+    up => up,
+    ex => ex.transition().duration(DUR).attr("transform", () => { const p = nodeById.get(s0.data.id); return `translate(${p.y},${p.x})`; }).style("opacity", 0).remove()
+  );
+  ns.classed("sel", d => d.data.id === selected)
+    .classed("dim", d => selected && !rel.has(d.data.id) && d.depth > 0);
+  ns.select("g.moreg").each(function (d) {
+    const c = countHidden(d), g1 = d3.select(this);
+    if (!c) { g1.attr("display", "none"); return; }
+    const t = "+" + c, w = Math.ceil(textW(t, '600 11px "Public Sans", Arial, sans-serif')) + 14;
+    g1.attr("display", null).attr("transform", `translate(${d.w + 8},0)`);
+    g1.select("rect").attr("width", w);
+    g1.select("text").attr("x", 7).text(t);
+  });
+  ns.transition().duration(DUR).attr("transform", d => `translate(${d.y},${d.x})`).style("opacity", null);
+  nodes.forEach(n => { n.x0 = n.x; n.y0 = n.y; });
+}
+
+const tip = document.getElementById("tip");
+function showTip(ev, d) {
+  const L = edgeLabel(d.a, d.b), A = byId.get(d.a).name, B = byId.get(d.b).name;
+  tip.innerHTML = `<b>${esc(A)} → ${esc(B)}</b><br>${esc(L.t)}${L.succ ? `<br>${esc(L.succ)}` : ""}${L.soft ? `<br><i>${esc(L.soft)}</i>` : ""}`;
+  tip.hidden = false;
+  const r = document.querySelector(".stage").getBoundingClientRect();
+  let x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
+  if (x + 290 > r.width) x = ev.clientX - r.left - 290;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.hidden = true; }
+function panelWidth() { const p = document.getElementById("panel"); return (!p.hidden && innerWidth > 760) ? p.offsetWidth + 24 : 0; }
+function center(n, k) {
+  const r = svg.node().getBoundingClientRect();
+  const t = d3.zoomTransform(svg.node());
+  const scale = k || Math.max(t.k, 0.85);
+  const pn = document.getElementById("panel");
+  const cx = (r.width - panelWidth()) / 2, cy = (innerWidth <= 760 && !pn.hidden) ? Math.max(60, (r.height - pn.offsetHeight) / 2) : r.height / 2;
+  svg.transition().duration(DUR + 150).call(zoom.transform, d3.zoomIdentity.translate(cx - scale * n.y, cy - scale * n.x).scale(scale));
+}
+function fit() {
+  const b = g.node().getBBox(); const r = svg.node().getBoundingClientRect();
+  const w = r.width - panelWidth() - (innerWidth <= 760 ? 16 : 40), h = r.height - 40;
+  const k = Math.min(1.1, Math.max(innerWidth <= 760 && b.width < 1400 ? 0.62 : 0.15, Math.min(w / b.width, h / b.height)));
+  svg.transition().duration(DUR + 150).call(zoom.transform, d3.zoomIdentity.translate(20 + (w - k * b.width) / 2 - k * b.x, 20 + (h - k * b.height) / 2 - k * b.y).scale(k));
+}
+/* one path open at a time: opening a coach closes his siblings' branches */
+function openOnly(n) {
+  if (n._children) n.children = n._children;
+  if (n.parent) n.parent.children.forEach(s => { if (s !== n) s.children = null; });
+}
+function reveal(id) {
+  const chainN = []; let n = nodeById.get(id).parent;
+  while (n) { chainN.unshift(n); n = n.parent; }
+  chainN.forEach(a => { if (a.parent) openOnly(a); else if (a._children) a.children = a._children; });
+}
+function click(n) {
+  if (selected === n.data.id && n.children) n.children = null;
+  else if (n._children) openOnly(n);
+  select(n.data.id, n);
+}
+function select(id, src) {
+  selected = id; reveal(id);
+  const n = nodeById.get(id);
+  update(src || n); show(n.data);
+  setTimeout(() => center(nodeById.get(id)), reduce ? 0 : 60);
+}
+
+/* ---------- panel ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const KIND = { root: "Founder", cur: "Current Big East head coach", be: "Big East head coach", men: "Mentor", grp: "Branch" };
+function chip(id, soft) { const d = byId.get(id); return `<button class="chip ${d.kind}" type="button" data-go="${id}">${esc(d.name)} <small>${esc(d.sub.split(" · ")[0])}</small>${soft ? " <i>inferred</i>" : ""}</button>`; }
+function show(d) {
+  const p = document.getElementById("panel"); p.hidden = false;
+  if (innerWidth <= 760) p.classList.add("peek");
+  const path = []; let n = nodeById.get(d.id).parent;
+  while (n) { if (n.data.kind !== "grp") path.unshift(n.data.id); n = n.parent; }
+  const learned = [...(d.parent && !["gavitt", "outside"].includes(d.parent) ? [d.parent] : []), ...d.also];
+  const down = [...d.kids.map(k => k.id), ...d.alsoTo];
+  p.innerHTML = `<button class="peekbar" type="button" aria-label="Expand or shrink the bio" data-peek><span></span></button><button class="x" type="button" aria-label="Close" data-close>×</button>
+    <div class="eyebrow">${KIND[d.kind]}</div>
+    <h2>${esc(d.name)}</h2>
+    <div class="schools">${esc(d.sub)}</div>
+    ${d.ff ? `<div class="stats"><span><b>${d.ti}</b>national title${d.ti === 1 ? "" : "s"}</span><span><b>${d.ff}</b>Final Four${d.ff === 1 ? "" : "s"}</span></div>` : ""}
+    ${SUCC[d.id] ? `<div class="succnote">Took over for <a data-go="${SUCC[d.id][0]}" style="cursor:pointer;text-decoration:underline">${esc(byId.get(SUCC[d.id][0]).name)}</a>, his old boss, at ${esc(SUCC[d.id][1])}.</div>` : ""}
+    ${d.kids.some(k => (SUCC[k.id] || [])[0] === d.id) || d.alsoTo.some(k => (SUCC[k] || [])[0] === d.id) ? `<div class="succnote">Succeeded by his own staff member: ${[...d.kids.map(k => k.id), ...d.alsoTo].filter(k => (SUCC[k] || [])[0] === d.id).map(k => esc(byId.get(k).name)).join(", ")}.</div>` : ""}
+    ${path.length ? `<div class="crumbs">${path.map(id => `<a data-go="${id}">${esc(byId.get(id).name)}</a>`).join(" → ")} → <b>${esc(d.name)}</b></div>` : ""}
+    <p class="bio">${esc(d.bio)}</p>
+    ${learned.length ? `<h3>Worked under</h3><div class="chips">${learned.map(id => chip(id, SOFT.has(id + ">" + d.id))).join("")}</div>` : ""}
+    ${down.length ? `<h3>${d.kind === "grp" ? "Lines" : d.kind === "root" ? "Founding coaches and branches" : "Came off his staffs"}</h3><div class="chips">${down.map(id => chip(id, SOFT.has(d.id + ">" + id))).join("")}</div>` : ""}
+    ${d.stops.length ? `<h3>Career stops</h3><ul class="stops">${d.stops.map(([a, b, f]) => `<li class="${f || ""}"><b>${esc(a)}</b> · ${esc(b)}</li>`).join("")}</ul>` : ""}
+    ${d.src.length ? `<h3>Sources</h3><div class="src">${d.src.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}`;
+  p.scrollTop = 0;
+}
+document.getElementById("panel").addEventListener("click", e => {
+  const p = document.getElementById("panel");
+  if (e.target.closest("[data-peek]")) { p.classList.toggle("peek"); p.scrollTop = 0; return; }
+  if (p.classList.contains("peek") && !e.target.closest("[data-close]")) { p.classList.remove("peek"); return; }
+  const go = e.target.closest("[data-go]"); if (go) { nav(go.dataset.go); return; }
+  if (e.target.closest("[data-close]")) { document.getElementById("panel").hidden = true; if (mode === "tree") { selected = null; update(); } }
+});
+
+/* ---------- tools ---------- */
+const dl = document.getElementById("names");
+D.filter(d => d.kind !== "grp").sort((a, b) => a.name.localeCompare(b.name)).forEach(d => { const o = document.createElement("option"); o.value = d.name; dl.appendChild(o); });
+const q = document.getElementById("q");
+function find() { const v = q.value.trim().toLowerCase(); if (!v) return; const d = D.find(x => x.name.toLowerCase() === v) || D.find(x => x.name.toLowerCase().includes(v)); if (d) { nav(d.id); q.blur(); } }
+q.addEventListener("change", find); q.addEventListener("keydown", e => { if (e.key === "Enter") find(); });
+document.getElementById("expand").onclick = () => { root.each(n => { if (n._children) n.children = n._children; }); update(); setTimeout(fit, DUR + 20); };
+document.getElementById("collapse").onclick = () => { root.each(n => { if (n.depth >= 1) n.children = null; }); selected = null; document.getElementById("panel").hidden = true; update(); setTimeout(fit, DUR + 20); };
+document.getElementById("fit").onclick = fit;
+document.getElementById("key").onclick = e => { const bar = document.querySelector(".bar"); const on = bar.classList.toggle("show-key"); e.currentTarget.setAttribute("aria-expanded", on); };
+svg.on("click.tip", hideTip);
+
+/* ---------- breakdown (decomposition) view ---------- */
+let mode = "tree";
+const MEAS = {
+  be: d => d.kind === "be" || d.kind === "cur",
+  cur: d => d.kind === "cur",
+  all: d => d.kind !== "root" && d.kind !== "grp",
+  ti: d => d.ti || 0,
+  ff: d => d.ff || 0
+};
+let meas = "be", dpath = ["gavitt"];
+function val(d) { let v = +MEAS[meas](d); d.kids.forEach(k => { v += val(k); }); return v; }
+function chain(id) { const out = []; let n = nodeById.get(id); while (n) { out.unshift(n.data.id); n = n.parent; } return out; }
+const LBL = { be: "Big East head coaches", cur: "Current head coaches", all: "Coaches on the tree", ti: "National titles", ff: "Final Fours" };
+
+function ditem(d, v, total, col, on) {
+  const pct = total ? Math.round(v / total * 100) : 0;
+  return `<button type="button" class="ditem ${d.kind} ${on ? "on" : ""}" data-id="${d.id}" data-col="${col}">
+    <span class="top"><span class="nm">${esc(d.name)}</span><span class="v">${v}</span></span>
+    <span class="sb">${esc(d.sub)}</span>
+    <span class="bar"><i style="width:${Math.max(pct, v ? 2 : 0)}%"></i></span>
+    <span class="pct">${pct}% of all ${LBL[meas].toLowerCase()}</span></button>`;
+}
+function renderDecomp() {
+  const box = document.getElementById("dcols");
+  const rootD = byId.get("gavitt"), total = val(rootD);
+  let html = `<div class="dcol"><div class="dhead">${LBL[meas]}</div>${ditem(rootD, total, total, -1, true)}</div>`;
+  dpath.forEach((pid, i) => {
+    const p = byId.get(pid);
+    const kids = p.kids.map(k => [k, val(k)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name));
+    const self = +MEAS[meas](p);
+    if (!kids.length && !self) { if (i > 0) html += `<div class="dcol"><div class="dhead">Under ${esc(p.name)}</div><div class="dleaf">Nothing under him counts toward this total.</div></div>`; return; }
+    html += `<div class="dcol"><div class="dhead">${p.kind === "root" ? "Split by branch" : "Under " + esc(p.name)}</div>
+      ${self ? `<div class="dself">${esc(p.name)} himself: ${self}</div>` : ""}
+      ${kids.map(([k, v]) => ditem(k, v, total, i, dpath[i + 1] === k.id)).join("")}
+      ${!kids.length ? `<div class="dleaf">End of this line.</div>` : ""}</div>`;
+  });
+  box.innerHTML = html + `<svg class="dlinks" id="dlinks"></svg>`;
+  drawDlinks();
+  fitDecomp();
+  const wrap = document.getElementById("decomp");
+  setTimeout(() => { wrap.scrollTo({ left: wrap.scrollWidth, behavior: reduce ? "auto" : "smooth" }); }, reduce ? 0 : 520);
+}
+/* Start zoomed in on the first columns; shrink as more columns open so the whole path stays in view. */
+function fitDecomp() {
+  const box = document.getElementById("dcols"), sizer = document.getElementById("dsizer"), wrap = document.getElementById("decomp");
+  const narrow = innerWidth <= 760;
+  const avail = wrap.clientWidth - (narrow ? 0 : panelWidth()) - 40;
+  const w = box.scrollWidth, h = box.scrollHeight;
+  const sc = Math.min(narrow ? 1.1 : 1.45, Math.max(narrow ? 0.8 : 0.78, avail / w));
+  box.style.transform = `scale(${sc})`;
+  sizer.style.width = Math.ceil(w * sc) + "px";
+  sizer.style.marginRight = (narrow ? 0 : panelWidth()) + "px";  /* newest column scrolls clear of the bio panel */
+  sizer.style.height = Math.ceil(h * sc) + "px";
+}
+function drawDlinks() {
+  const box = document.getElementById("dcols"), s = document.getElementById("dlinks");
+  const pos = el => ({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+  s.setAttribute("width", box.scrollWidth); s.setAttribute("height", box.scrollHeight);
+  const cols = [...box.querySelectorAll(".dcol")];
+  let paths = "";
+  for (let i = 0; i < cols.length - 1; i++) {
+    const src = cols[i].querySelector(".ditem.on"); if (!src) continue;
+    const a = pos(src);
+    const x1 = a.x + a.w, y1 = a.y + a.h / 2;
+    cols[i + 1].querySelectorAll(".ditem").forEach(t => {
+      const b = pos(t);
+      const x2 = b.x, y2 = b.y + b.h / 2, mx = (x1 + x2) / 2;
+      paths += `<path class="${t.classList.contains("on") ? "on" : ""}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+    });
+  }
+  s.innerHTML = paths;
+}
+document.getElementById("dcols").addEventListener("click", e => {
+  const b = e.target.closest(".ditem"); if (!b) return;
+  const col = +b.dataset.col, id = b.dataset.id;
+  dpath = col < 0 ? ["gavitt"] : dpath.slice(0, col + 1).concat(id);
+  renderDecomp(); show(byId.get(id));
+});
+document.getElementById("meas").addEventListener("change", e => {
+  meas = e.target.value;
+  while (dpath.length > 1 && val(byId.get(dpath[dpath.length - 1])) === 0) dpath.pop();
+  renderDecomp();
+});
+function setMode(m) {
+  mode = m;
+  document.querySelector(".app").classList.toggle("mode-decomp", m === "decomp");
+  document.querySelector(".app").classList.toggle("mode-others", m === "others");
+  document.getElementById("decomp").hidden = m !== "decomp";
+  document.getElementById("others").hidden = m !== "others";
+  if (m === "others") { document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === m)); return; }
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === m));
+  if (m === "decomp") { if (selected) dpath = chain(selected); renderDecomp(); }
+  else { const last = dpath[dpath.length - 1]; if (last && last !== "gavitt") select(last); else setTimeout(fit, 30); }
+}
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => setMode(b.dataset.view)));
+function nav(id) {
+  if (mode === "decomp") { dpath = chain(id); renderDecomp(); show(byId.get(id)); }
+  else select(id);
+}
+addEventListener("resize", () => { if (mode === "decomp") { drawDlinks(); fitDecomp(); } });
+
+/* ---------- start ---------- */
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measure(); gN.selectAll("g.node").remove(); const d0 = DUR; DUR = 0; update(); DUR = d0; });
+update();
+DUR = reduce ? 0 : 450;
+show(byId.get("gavitt"));
+if (innerWidth <= 760) document.getElementById("panel").hidden = true;
+setTimeout(fit, 30);
+addEventListener("resize", () => { clearTimeout(window.__r); window.__r = setTimeout(fit, 200); });
+</script>
+
+</body>
+</html>
