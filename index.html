@@ -153,6 +153,9 @@ svg.dlinks path.on { stroke: var(--fg); stroke-width: 2.6; }
 .bar { border-bottom: 3px double var(--fg); padding-block: 10px 12px; }
 .mast .kicker { font: 500 10.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--fg); padding-bottom: 3px; margin-bottom: 4px; display: inline-block; }
 .bar h1 { font: 700 2rem/1 var(--serif); letter-spacing: -.02em; }
+.mast .home { display: block; width: max-content; margin-bottom: 8px; font: 600 11px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); text-decoration: none; padding: 2px 0; }
+.mast .home:hover { text-decoration: underline; text-underline-offset: 3px; }
+.mast .home:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .mast .disclaim { font: 11px var(--sans); color: var(--muted); margin-top: 3px; max-width: 46ch; }
 #others { position: absolute; inset: 0; overflow: auto; padding-block: 28px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .oinner { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
@@ -211,6 +214,7 @@ svg.dlinks path.on { stroke: var(--fg); stroke-width: 2.6; }
 @media (max-width: 760px) {
   .bar { gap: 8px 10px; padding-block: 8px 10px; }
   .mast .kicker { display: none; }
+  .mast .home { margin-bottom: 2px; padding: 8px 0; font-size: 12px; }   /* bigger tap target */
   .bar h1 { font-size: 1.55rem; }
   .mast .byline { font-size: 12.5px; margin-top: 2px; }
   .mast .disclaim { font-size: 10px; margin-top: 2px; }
@@ -248,7 +252,7 @@ svg.dlinks path.on { stroke: var(--fg); stroke-width: 2.6; }
 
 <div class="app">
   <header class="bar">
-    <div class="mast"><div class="kicker">Men's basketball · From the founders to today</div><h1>Big East Coaching Tree</h1><div class="byline">Concept Developed by Nicholas Taylor</div><div class="disclaim">Independent fan project. Not affiliated with, endorsed by or sponsored by the NCAA or the Big East Conference.</div></div>
+    <div class="mast"><a class="home" href="https://since79.org/"><span aria-hidden="true">←</span> Return to Since '79</a><div class="kicker">Men's basketball · From the founders to today</div><h1>Big East Coaching Tree</h1><div class="byline">Concept Developed by Nicholas Taylor</div><div class="disclaim">Independent fan project. Not affiliated with, endorsed by or sponsored by the NCAA or the Big East Conference.</div></div>
     <div class="legend" id="legend">
       <span><i class="sw cur"></i>Current head coach</span>
       <span><i class="sw be"></i>Big East head coach</span>
